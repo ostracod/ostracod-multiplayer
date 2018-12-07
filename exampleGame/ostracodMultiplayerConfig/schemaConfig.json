@@ -1,0 +1,33 @@
+{
+    "tables": [
+        {
+            "name": "Users",
+            "fields": [
+                {
+                    "name": "uid",
+                    "type": "INT",
+                    "primaryKey": true,
+                    "autoIncrement": true
+                },
+                {
+                    "name": "username",
+                    "type": "VARCHAR(100)"
+                },
+                {
+                    "name": "passwordHash",
+                    "type": "VARCHAR(100)"
+                },
+                {
+                    "name": "emailAddress",
+                    "type": "VARCHAR(200)"
+                },
+                {
+                    "name": "score",
+                    "type": "BIGINT"
+                }
+            ]
+        }
+    ]
+}
+
+

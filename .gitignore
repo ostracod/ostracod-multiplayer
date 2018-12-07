@@ -1,5 +1,9 @@
 
 .DS_Store
 node_modules
+sessionSecret.txt
+databaseConfig.json
+ssl.crt
+ssl.key
 
 

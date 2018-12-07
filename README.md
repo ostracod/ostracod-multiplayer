@@ -80,7 +80,6 @@ For a minimal setup, your database must include at least this table:
         {"name": "passwordHash", "type": "VARCHAR(100)"},
         {"name": "emailAddress", "type": "VARCHAR(200)"},
         {"name": "score", "type": "BIGINT"},
-        {"name": "avatarColor", "type": "INT"}
     ]
 }
 ```
