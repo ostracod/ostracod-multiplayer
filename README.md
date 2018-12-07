@@ -25,15 +25,73 @@ To install on Ubuntu, I recommend [this page](https://www.digitalocean.com/commu
 To install the Node.js module:
 
 ```
-npm install ostracod/ostracod-multiplayer
+npm install github:ostracod/ostracod-multiplayer
 ```
 
 Create a directory in your project named `ostracodMultiplayerConfig`. You will need to put the following files there:
 
-* `ostracodMultiplayerConfig/schemaConfig.json`
 * `ostracodMultiplayerConfig/ssl.crt`
 * `ostracodMultiplayerConfig/ssl.key`
 * `ostracodMultiplayerConfig/sessionSecret.txt`
 * `ostracodMultiplayerConfig/databaseConfig.json`
+* `ostracodMultiplayerConfig/schemaConfig.json`
+
+`ssl.crt` and `ssl.key` are the files required to enable https. `sessionSecret` should contain a complex string for browser session data.
+
+`databaseConfig.json` must have the following format:
+
+```
+{
+    "host": String (Server address),
+    "databaseName": String,
+    "username": String,
+    "password": String
+}
+```
+
+`schemaConfig.json` must have this format:
+
+```
+{
+    "tables": [
+        {
+            "name": String,
+            "fields": [
+                {
+                    "name": String,
+                    "type": String,
+                    "primaryKey": Boolean (Optional),
+                    "autoIncrement": Boolean (Optional)
+                }
+            ]
+        }
+    ]
+}
+```
+
+For a minimal setup, your database must include at least this table:
+
+```
+{
+    "name": "Users",
+    "fields": [
+        {"name": "uid", "type": "INT", "primaryKey": true, "autoIncrement": true},
+        {"name": "username", "type": "VARCHAR(100)"},
+        {"name": "passwordHash", "type": "VARCHAR(100)"},
+        {"name": "emailAddress", "type": "VARCHAR(200)"},
+        {"name": "score", "type": "BIGINT"},
+        {"name": "avatarColor", "type": "INT"}
+    ]
+}
+```
+
+To set up your database, set your current working directory to the top level of your project, then invoke `schemaTool.js`:
+
+```
+cd (Path to your project)
+node ./node_modules/ostracod-multiplayer/schemaTool.js setup
+```
+
+You can also replace `setup` with `verify` or `destroy` for other actions.
 
 

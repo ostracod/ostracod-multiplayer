@@ -1,0 +1,7 @@
+{
+  "name": "example-game",
+  "version": "1.0.0",
+  "dependencies": {
+    "ostracod-multiplayer": "github:ostracod/ostracod-multiplayer"
+  }
+}
