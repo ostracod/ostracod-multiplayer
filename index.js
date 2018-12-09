@@ -12,6 +12,8 @@ var https = require("https");
 var fs = require("fs");
 var expressWs = require("express-ws");
 
+var pageUtils = require("./pageUtils").pageUtils;
+
 var mode;
 
 function initializeServer(basePath) {
@@ -62,6 +64,7 @@ function initializeServer(basePath) {
     app.use(bodyParser.urlencoded({extended: false}));
     app.use(cookieParser());
     app.use(express.static(pathUtils.join(__dirname, "public")));
+    app.use(express.static(pathUtils.join(basePath, "public")));
     app.set("trust proxy", 1);
     app.use(session({
         secret: serverConfig.secret,
@@ -82,16 +85,16 @@ function initializeServer(basePath) {
     
     // Error handler.
     app.use(function(error, req, res, next) {
-        var tempPageData = {message: error.message};
+        var tempParameters = {message: error.message};
         if (mode == "development") {
-            tempPageData.error = error;
+            tempParameters.error = error;
         }
         if (error.status) {
             res.status(error.status);
         } else {
             res.status(500);
         }
-        res.render("error.html", tempPageData);
+        res.render("error.html", tempParameters);
     });
     
     var portNumber = serverConfig.port;
@@ -109,7 +112,8 @@ function getMode() {
 
 module.exports = {
     initializeServer: initializeServer,
-    getMode: getMode
+    getMode: getMode,
+    pageUtils: pageUtils
 }
 
 
