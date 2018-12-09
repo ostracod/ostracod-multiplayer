@@ -1,5 +1,6 @@
 
 var fs = require("fs");
+var pathUtils = require("path");
 var Mustache = require("mustache");
 
 function PageUtils() {
@@ -22,6 +23,48 @@ PageUtils.prototype.renderPage = function(res, path, scriptList, parameters) {
         scripts: scriptList,
         content: tempContent
     });
+}
+
+PageUtils.prototype.getLocalViewPath = function(fileName) {
+    return pathUtils.join(__dirname, "views", fileName);
+}
+
+PageUtils.prototype.serveMessagePage = function(res, message, url, urlLabel) {
+    pageUtils.renderPage(
+        res,
+        pageUtils.getLocalViewPath("message.html"),
+        [],
+        {
+            message: message,
+            url: url,
+            urlLabel: urlLabel
+        }
+    );
+}
+
+PageUtils.prototype.generateReturnUrl = function(req) {
+    if (req.session.username) {
+        return {
+            url: "/menu",
+            urlLabel: "Return to Main Menu"
+        };
+    } else {
+        return {
+            url: "/login",
+            urlLabel: "Return to Login Page"
+        };
+    }
+}
+
+PageUtils.prototype.reportDatabaseErrorWithJson = function(error, req, res) {
+    res.json({success: false, message: "An error occurred. Please contact an administrator."});
+    console.log(error);
+}
+
+PageUtils.prototype.reportDatabaseErrorWithPage = function(error, req, res) {
+    var tempUrl = pageUtils.generateReturnUrl(req);
+    pageUtils.serveMessagePage(res, "An error occurred. Please contact an administrator.", tempUrl.url, tempUrl.urlLabel);
+    console.log(error);
 }
 
 

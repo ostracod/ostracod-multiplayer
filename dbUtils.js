@@ -1,7 +1,6 @@
 
 var fs = require("fs");
 var pathUtils = require("path");
-var bcrypt = require("bcrypt");
 var mysql = require("mysql");
 
 var databaseConfig;

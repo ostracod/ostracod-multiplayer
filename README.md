@@ -114,6 +114,7 @@ This module exposes the following members:
 * `ostracodMultiplayer`: Controls high-level server operations.
 * `pageUtils`: Contains various functions for serving pages.
 * `dbUtils`: Contains various functions for accessing the database.
+* `accountUtils`: Contains various functions for processing user accounts.
 
 `ostracodMultiplayer` contains the following members:
 
@@ -128,5 +129,10 @@ This module exposes the following members:
 
 * `dbUtils.performTransaction(operation, done)`: Performs the operation with a lock on the database.
 * `dbUtils.performQuery(query, parameterList, done)`: Performs a single query on the database. Will not work outside of `performTransaction`.
+
+`accountUtils` contains the following members:
+
+* `accountUtils.getAccountByUsername(username, done)`: Retrieves a user by username. Must be performed in a DB transaction.
+* `accountUtils.updateAccount(uid, valueSet, done)`: Modifies fields in a user account. Must be performed in a DB transaction.
 
 
