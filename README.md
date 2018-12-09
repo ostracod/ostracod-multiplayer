@@ -103,4 +103,18 @@ node ./node_modules/ostracod-multiplayer/schemaTool.js setup
 
 You can also replace `setup` with `verify` or `destroy` for other actions.
 
+Put your statically served files (stylesheets, images, etc.) in a top-level directory named `public`.
+
+## Usage
+
+This module exposes the following members:
+
+* `initializeServer(basePath)`: Starts running the server.
+* `getMode()`: Returns `"development"` or `"production"`.
+* `pageUtils`: Contains various functions for serving pages.
+
+`pageUtils` contains the follow members:
+
+* `pageUtils.renderPage(res, path, parameters)`: Renders the page at `path` with given parameters using Mustache.
+
 
