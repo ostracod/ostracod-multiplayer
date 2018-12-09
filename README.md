@@ -32,11 +32,21 @@ Create a directory in your project named `ostracodMultiplayerConfig`. You will n
 
 * `ostracodMultiplayerConfig/ssl.crt`
 * `ostracodMultiplayerConfig/ssl.key`
-* `ostracodMultiplayerConfig/sessionSecret.txt`
+* `ostracodMultiplayerConfig/serverConfig.json`
 * `ostracodMultiplayerConfig/databaseConfig.json`
 * `ostracodMultiplayerConfig/schemaConfig.json`
+* `ostracodMultiplayerConfig/favicon.ico` (Optional)
 
-`ssl.crt` and `ssl.key` are the files required to enable https. `sessionSecret` should contain a complex string for browser session data.
+`ssl.crt` and `ssl.key` are the files required to enable https.
+
+`serverConfig` should contain the following information:
+
+```
+{
+    "port": Number,
+    "secret": String (For cookies)
+}
+```
 
 `databaseConfig.json` must have the following format:
 
