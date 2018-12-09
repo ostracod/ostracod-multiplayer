@@ -51,10 +51,7 @@ function initializeServer(basePath) {
     }
     expressWs(app, server);
     
-    // view engine setup
     app.set("views", pathUtils.join(__dirname, "views"));
-    app.set("view engine", "jade");
-    
     app.engine("html", mustacheExpress());
     
     var faviconPath = pathUtils.join(configDirectory, "public", "favicon.ico");
@@ -83,17 +80,18 @@ function initializeServer(basePath) {
         next(tempError);
     });
     
-    // TODO: Rework the error handler.
-    
-    // error handler
-    app.use(function(err, req, res, next) {
-        // set locals, only providing error in development
-        res.locals.message = err.message;
-        res.locals.error = req.app.get("env") === "development" ? err : {};
-        
-        // render the error page
-        res.status(err.status || 500);
-        res.render("error");
+    // Error handler.
+    app.use(function(error, req, res, next) {
+        var tempPageData = {message: error.message};
+        if (mode == "development") {
+            tempPageData.error = error;
+        }
+        if (error.status) {
+            res.status(error.status);
+        } else {
+            res.status(500);
+        }
+        res.render("error.html", tempPageData);
     });
     
     var portNumber = serverConfig.port;
