@@ -12,7 +12,7 @@ var https = require("https");
 var fs = require("fs");
 var expressWs = require("express-ws");
 
-var mode = app.get("env");
+var mode;
 
 function initializeServer(basePath) {
     
@@ -21,6 +21,7 @@ function initializeServer(basePath) {
     var serverConfig = JSON.parse(fs.readFileSync(pathUtils.join(configDirectory, "serverConfig.json"), "utf8"));
     
     var app = express();
+    mode = app.get("env");
     if (mode == "development") {
         console.log("WARNING: APPLICATION RUNNING IN DEVELOPMENT MODE!");
         console.log("CACHING TURNED OFF");
@@ -104,9 +105,13 @@ function initializeServer(basePath) {
     return true;
 }
 
+function getMode() {
+    return mode;
+}
+
 module.exports = {
     initializeServer: initializeServer,
-    mode: mode
+    getMode: getMode
 }
 
 
