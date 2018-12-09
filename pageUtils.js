@@ -14,11 +14,12 @@ module.exports = {
 
 var ostracodMultiplayer = require("./ostracodMultiplayer").ostracodMultiplayer;
 
-PageUtils.prototype.renderPage = function(res, path, parameters) {
+PageUtils.prototype.renderPage = function(res, path, scriptList, parameters) {
     var tempTemplate = fs.readFileSync(path, "utf8");
     var tempContent = Mustache.render(tempTemplate, parameters);
     res.render("template.html", {
         gameName: ostracodMultiplayer.serverConfig.gameName.toUpperCase(),
+        scripts: scriptList,
         content: tempContent
     });
 }

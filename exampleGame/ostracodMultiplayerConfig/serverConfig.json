@@ -1,5 +1,6 @@
 {
     "gameName": "ExampleGame",
+    "author": "Smith Smithberg",
     "port": 2628,
     "secret": "SUPER_SECRET"
 }

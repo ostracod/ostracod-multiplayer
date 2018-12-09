@@ -25,7 +25,6 @@ module.exports = {
     ostracodMultiplayer: ostracodMultiplayer,
 }
 
-var pageUtils = require("./pageUtils").pageUtils;
 var dbUtils = require("./dbUtils").dbUtils;
 var router = require("./router");
 

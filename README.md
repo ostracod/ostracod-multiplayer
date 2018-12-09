@@ -44,6 +44,7 @@ Create a directory in your project named `ostracodMultiplayerConfig`. You will n
 ```
 {
     "gameName": String,
+    "author": String,
     "port": Number,
     "secret": String (For cookies)
 }
