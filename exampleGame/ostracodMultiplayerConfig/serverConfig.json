@@ -1,4 +1,5 @@
 {
+    "gameName": "ExampleGame",
     "port": 2628,
     "secret": "SUPER_SECRET"
 }

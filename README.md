@@ -43,6 +43,7 @@ Create a directory in your project named `ostracodMultiplayerConfig`. You will n
 
 ```
 {
+    "gameName": String,
     "port": Number,
     "secret": String (For cookies)
 }
@@ -124,8 +125,6 @@ This module exposes the following members:
 
 `dbUtils` contains the following members:
 
-* `dbUtils.generatePasswordHash(password, done)`: Generates a hash using Bcrypt.
-* `dbUtils.comparePasswordWithHash(password, hash, done)`: Checks if the password matches with the hash.
 * `dbUtils.performTransaction(operation, done)`: Performs the operation with a lock on the database.
 * `dbUtils.performQuery(query, parameterList, done)`: Performs a single query on the database. Will not work outside of `performTransaction`.
 

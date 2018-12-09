@@ -16,6 +16,7 @@ function OstracodMultiplayer() {
     this.mode = null;
     this.basePath = null;
     this.configDirectory = null;
+    this.serverConfig = null;
 }
 
 var ostracodMultiplayer = new OstracodMultiplayer();
@@ -34,8 +35,7 @@ OstracodMultiplayer.prototype.initializeServer = function(basePath) {
     this.mode = this.app.get("env");
     this.basePath = basePath;
     this.configDirectory = pathUtils.join(basePath, "ostracodMultiplayerConfig");
-    
-    var serverConfig = JSON.parse(fs.readFileSync(
+    this.serverConfig = JSON.parse(fs.readFileSync(
         pathUtils.join(this.configDirectory, "serverConfig.json"),
         "utf8"
     ));
@@ -83,7 +83,7 @@ OstracodMultiplayer.prototype.initializeServer = function(basePath) {
     this.app.use(express.static(pathUtils.join(basePath, "public")));
     this.app.set("trust proxy", 1);
     this.app.use(session({
-        secret: serverConfig.secret,
+        secret: this.serverConfig.secret,
         resave: false,
         saveUninitialized: true,
         cookie: {maxAge: 24 * 60 * 60 * 1000}
@@ -114,7 +114,7 @@ OstracodMultiplayer.prototype.initializeServer = function(basePath) {
     
     dbUtils.initialize();
     
-    var portNumber = serverConfig.port;
+    var portNumber = this.serverConfig.port;
     
     server.listen(portNumber, function() {
         console.log("Listening on port " + portNumber + ".");
