@@ -109,12 +109,24 @@ Put your statically served files (stylesheets, images, etc.) in a top-level dire
 
 This module exposes the following members:
 
-* `initializeServer(basePath)`: Starts running the server.
-* `getMode()`: Returns `"development"` or `"production"`.
+* `ostracodMultiplayer`: Controls high-level server operations.
 * `pageUtils`: Contains various functions for serving pages.
+* `dbUtils`: Contains various functions for accessing the database.
+
+`ostracodMultiplayer` contains the following members:
+
+* `ostracodMultiplayer.initializeServer(basePath)`: Starts running the server.
+* `ostracodMultiplayer.mode`: Either `"development"` or `"production"`.
 
 `pageUtils` contains the follow members:
 
 * `pageUtils.renderPage(res, path, parameters)`: Renders the page at `path` with given parameters using Mustache.
+
+`dbUtils` contains the following members:
+
+* `dbUtils.generatePasswordHash(password, done)`: Generates a hash using Bcrypt.
+* `dbUtils.comparePasswordWithHash(password, hash, done)`: Checks if the password matches with the hash.
+* `dbUtils.performTransaction(operation, done)`: Performs the operation with a lock on the database.
+* `dbUtils.performQuery(query, parameterList, done)`: Performs a single query on the database. Will not work outside of `performTransaction`.
 
 

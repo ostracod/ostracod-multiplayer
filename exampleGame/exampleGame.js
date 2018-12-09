@@ -1,5 +1,5 @@
 
-var ostracodMultiplayer = require("ostracod-multiplayer");
+var ostracodMultiplayer = require("ostracod-multiplayer").ostracodMultiplayer;
 
 console.log("Starting OstracodMultiplayer...");
 
