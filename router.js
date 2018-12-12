@@ -196,4 +196,34 @@ router.get("/menu", checkAuthentication(PAGE_ERROR_OUTPUT), function(req, res, n
     );
 });
 
+router.get("/leaderboard", function(req, res, next) {
+    dbUtils.performTransaction(function(done) {
+        accountUtils.getLeaderboardAccounts(20, function(error, accountList) {
+            if (error) {
+                pageUtils.reportDatabaseErrorWithPage(error, req, res);
+                done();
+                return;
+            }
+            var index = 0;
+            while (index < accountList.length) {
+                var tempAccount = accountList[index];
+                tempAccount.ordinalNumber = index + 1;
+                index += 1;
+            }
+            var tempUrl = pageUtils.generateReturnUrl(req);
+            pageUtils.renderPage(
+                res,
+                pageUtils.getLocalViewPath("leaderboard.html"),
+                [],
+                {
+                    accountList: accountList,
+                    url: tempUrl.url,
+                    urlLabel: tempUrl.urlLabel
+                }
+            );
+            done();
+        });
+    }, function() {});
+});
+
 
