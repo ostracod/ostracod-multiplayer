@@ -196,6 +196,17 @@ router.get("/menu", checkAuthentication(PAGE_ERROR_OUTPUT), function(req, res, n
     );
 });
 
+router.get("/game", checkAuthentication(PAGE_ERROR_OUTPUT), function(req, res, next) {
+    pageUtils.renderPage(
+        res,
+        pageUtils.getLocalViewPath("game.html"),
+        ["javascript/baseGame.js"],
+        {
+            debugMode: (ostracodMultiplayer.mode == "development")
+        }
+    );
+});
+
 router.get("/leaderboard", function(req, res, next) {
     dbUtils.performTransaction(function(done) {
         accountUtils.getLeaderboardAccounts(20, function(error, accountList) {

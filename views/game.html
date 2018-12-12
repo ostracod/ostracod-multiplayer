@@ -1,0 +1,67 @@
+<div style="float: left;">
+    <div style="position: relative;">
+        <canvas id="canvas"></canvas>
+        <div id="overlayChat" style="position: absolute; left: 16px; top: 16px; padding: 8px; background: #000000; color: #FFFFFF; opacity: 0.6; width: 350px;">
+            <div id="overlayChatOutput">
+            </div>
+            <div>
+                <input id="overlayChatInput" onfocus="setAllInputIsFocusedAsFalse(); overlayChatInputIsFocused = true;" style="width: 325; background: #000000; color: #FFFFFF; border: 1px #444444 solid; font-family: Arial; font-size: 16px; display: none;" autocomplete="off" />
+            </div>
+        </div>
+    </div>
+    <p>
+        Custom instructions go here.
+    </p>
+    <p {{^debugMode}}style="display: none;"{{/debugMode}}>
+        Ping time: <span id="pingTime"></span> ms
+    </p>
+    <p>
+        <a href="menu">Return to Menu</a>
+    </p>
+</div>
+<div style="float: left; margin-left: 15px; margin-top: 15px; width: 350px;">
+    <div style="background: #444444; padding-right: 8px; padding-bottom: 8px; border-radius: 15px;">
+        <button id="chatButton" class="moduleButton" onclick="showOrHideModuleByName('chat');">Chat</button>
+        <button id="onlinePlayersButton" class="moduleButton" onclick="showOrHideModuleByName('onlinePlayers');">Players</button>
+    </div>
+    
+    <div id="chatModule" class="module">
+        <p>
+            <div style="float: left;">
+                <h2>CHAT</h2>
+            </div>
+            <div style="float: right;">
+                <button class="closeButton" onclick="hideModuleByName('chat');">&#xD7;</button>
+            </div>
+            <br style="clear: both;" />
+        </p>
+        <p>
+            <input id="showOverlay" type="checkbox" checked="checked" /> <span style="vertical-align: -2px;">Show overlay on game</span>
+        </p>
+        <div id="chatOutput" style="padding: 10px; width: 305px; height: 150px; overflow-y: scroll; border: 1px #888888 solid;">
+        </div>
+        <input id="chatInput" onfocus="setAllInputIsFocusedAsFalse(); chatInputIsFocused = true;" style="width: 325px; margin-top: 8px;" autocomplete="off" />
+    </div>
+    
+    <div id="onlinePlayersModule" class="module">
+        <p>
+            <div style="float: left;">
+                <h2>ONLINE PLAYERS</h2>
+            </div>
+            <div style="float: right;">
+                <button class="closeButton" onclick="hideModuleByName('onlinePlayers');">&#xD7;</button>
+            </div>
+            <br style="clear: both;" />
+        </p>
+        <div id="onlinePlayersDiv" style="padding: 10px; width: 305px; height: 200px; overflow-y: scroll; border: 1px #888888 solid;">
+        </div>
+    </div>
+</div>
+<br style="clear: both;" />
+<script>
+
+baseInitializeGame();
+
+</script>
+
+
