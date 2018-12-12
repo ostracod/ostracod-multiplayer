@@ -27,7 +27,7 @@ router.get("/login", function(req, res, next) {
     pageUtils.renderPage(
         res,
         pageUtils.getLocalViewPath("login.html"),
-        ["javascript/login.js"],
+        {scripts: ["javascript/login.js"]},
         {author: ostracodMultiplayer.serverConfig.author}
     );
 });
@@ -77,7 +77,7 @@ router.get("/createAccount", function(req, res, next) {
     pageUtils.renderPage(
         res,
         pageUtils.getLocalViewPath("createAccount.html"),
-        ["javascript/createAccount.js"],
+        {scripts: ["javascript/createAccount.js"]},
         {}
     );
 });
@@ -131,7 +131,7 @@ router.get("/changePassword", checkAuthentication(PAGE_ERROR_OUTPUT), function(r
     pageUtils.renderPage(
         res,
         pageUtils.getLocalViewPath("changePassword.html"),
-        ["javascript/changePassword.js"],
+        {scripts: ["javascript/changePassword.js"]},
         {}
     );
 });
@@ -188,7 +188,7 @@ router.get("/menu", checkAuthentication(PAGE_ERROR_OUTPUT), function(req, res, n
     pageUtils.renderPage(
         res,
         pageUtils.getLocalViewPath("menu.html"),
-        [],
+        {},
         {
             username: tempUsername,
             score: 0 // TODO: Populate score.
@@ -200,7 +200,10 @@ router.get("/game", checkAuthentication(PAGE_ERROR_OUTPUT), function(req, res, n
     pageUtils.renderPage(
         res,
         pageUtils.getLocalViewPath("game.html"),
-        ["javascript/baseGame.js"],
+        {
+            scripts: ["javascript/baseGame.js"],
+            shouldDisplayTitle: false
+        },
         {
             debugMode: (ostracodMultiplayer.mode == "development")
         }
@@ -225,7 +228,7 @@ router.get("/leaderboard", function(req, res, next) {
             pageUtils.renderPage(
                 res,
                 pageUtils.getLocalViewPath("leaderboard.html"),
-                [],
+                {},
                 {
                     accountList: accountList,
                     url: tempUrl.url,

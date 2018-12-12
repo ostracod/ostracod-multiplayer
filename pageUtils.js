@@ -17,12 +17,25 @@ module.exports = {
 
 var ostracodMultiplayer = require("./ostracodMultiplayer").ostracodMultiplayer;
 
-PageUtils.prototype.renderPage = function(res, path, scriptList, parameters) {
+PageUtils.prototype.renderPage = function(res, path, options, parameters) {
+    var tempScriptList;
+    if (typeof options.scripts === "undefined") {
+        tempScriptList = [];
+    } else {
+        tempScriptList = options.scripts;
+    }
+    var tempShouldDisplayTitle;
+    if (typeof options.shouldDisplayTitle === "undefined") {
+        tempShouldDisplayTitle = true;
+    } else {
+        tempShouldDisplayTitle = options.shouldDisplayTitle;
+    }
     var tempTemplate = fs.readFileSync(path, "utf8");
     var tempContent = Mustache.render(tempTemplate, parameters);
     res.render("template.html", {
         gameName: ostracodMultiplayer.serverConfig.gameName.toUpperCase(),
-        scripts: scriptList,
+        scripts: tempScriptList,
+        shouldDisplayTitle: tempShouldDisplayTitle,
         content: tempContent
     });
 }
@@ -35,7 +48,7 @@ PageUtils.prototype.serveMessagePage = function(res, message, url, urlLabel) {
     pageUtils.renderPage(
         res,
         pageUtils.getLocalViewPath("message.html"),
-        [],
+        {},
         {
             message: message,
             url: url,

@@ -8,7 +8,7 @@
     </head>
     <body>
         <div id="content" style="width: 680px;">
-            <h2>{{gameName}}</h2>
+            {{#shouldDisplayTitle}}<h2>{{gameName}}</h2>{{/shouldDisplayTitle}}
             {{{content}}}
         </div>
     </body>
