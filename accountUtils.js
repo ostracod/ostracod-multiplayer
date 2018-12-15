@@ -100,10 +100,10 @@ AccountUtils.prototype.updateAccount = function(uid, valueSet, done) {
     );
 }
 
-AccountUtils.prototype.removeAccount = function(index, done) {
+AccountUtils.prototype.removeAccount = function(uid, done) {
     dbUtils.performQuery(
         "DELETE FROM Users WHERE uid = ?",
-        [account.uid],
+        [uid],
         function (error, results, fields) {
             if (error) {
                 done(dbUtils.convertSqlErrorToText(error));
