@@ -5,14 +5,11 @@ var context;
 var canvasWidth = 600;
 var canvasHeight = 600;
 var framesPerSecond = 25;
-var canvasIsFocused = true;
 var shiftKeyIsHeld = false;
-var chatInputIsFocused = false;
 var chatInput;
 var chatOutput;
 var chatMessageTagList = [];
 var maximumChatMessageCount = 100;
-var overlayChatInputIsFocused = false;
 var overlayChatInput;
 var overlayChatOutput;
 var overlayChatMessageList = [];
@@ -25,6 +22,7 @@ var lastActivityTime = 0;
 var gameUpdateSocket;
 var gameUpdateStartTimestamp;
 var moduleList = [];
+var focusedTextInput = null;
 
 var encodeHtmlEntity = function(text) {
     var tempList = [];
@@ -176,11 +174,11 @@ OverlayChatMessage.prototype.removeTag = function() {
 
 OverlayChatMessage.prototype.getIsVisible = function() {
     var tempValue = document.getElementById("showOverlay").checked
-    return ((this.delay > 0 && tempValue) || overlayChatInputIsFocused);
+    return ((this.delay > 0 && tempValue) || focusedTextInput == overlayChatInput);
 }
 
 OverlayChatMessage.prototype.tick = function() {
-    if (overlayChatInputIsFocused) {
+    if (focusedTextInput == overlayChatInput) {
         this.tag.style.color = "#FFFFFF";
         this.tag.style.display = "block";
     } else {
@@ -264,16 +262,20 @@ function hideModuleByName(name) {
     tempModule.hide();
 }
 
-function setAllInputIsFocusedAsFalse() {
-    canvasIsFocused = false;
-    chatInputIsFocused = false;
-    overlayChatInputIsFocused = false;
-    // TODO: Accommodate more text inputs.
-}
-
 function clearCanvas() {
     context.fillStyle = "#FFFFFF";
     context.fillRect(0, 0, canvasWidth, canvasHeight);
+}
+
+function configureTextInputFocusHandlers(tag) {
+    tag.onfocus = function() {
+        focusedTextInput = tag;
+    }
+    tag.onblur = function() {
+        if (focusedTextInput == tag) {
+            focusedTextInput = null;
+        }
+    }
 }
 
 function baseKeyDownEvent(event) {
@@ -282,7 +284,7 @@ function baseKeyDownEvent(event) {
     if (keyCode == 16) {
         shiftKeyIsHeld = true;
     }
-    if (chatInputIsFocused) {
+    if (focusedTextInput == chatInput) {
         if (keyCode == 13) {
             var tempText = chatInput.value;
             if (tempText.length > 0) {
@@ -290,7 +292,7 @@ function baseKeyDownEvent(event) {
                 chatInput.value = "";
             }
         }
-    } else if (overlayChatInputIsFocused) {
+    } else if (focusedTextInput == overlayChatInput) {
         if (keyCode == 13) {
             var tempText = overlayChatInput.value;
             if (tempText.length > 0) {
@@ -300,17 +302,13 @@ function baseKeyDownEvent(event) {
             overlayChatInput.style.display = "none";
             overlayChatInputIsVisible = false;
             overlayChatInput.blur();
-            setAllInputIsFocusedAsFalse();
-            canvasIsFocused = true;
         }
-    } else if (canvasIsFocused) {
+    } else if (focusedTextInput === null) {
         if (keyCode == 13) {
             document.getElementById("overlayChat").style.display = "block";
             overlayChatInput.style.display = "block";
             overlayChatInputIsVisible = true;
-            setAllInputIsFocusedAsFalse();
             overlayChatInput.focus();
-            overlayChatInputIsFocused = true;
         }
     }
     // TODO: Custom key bindings.
@@ -398,8 +396,6 @@ function baseInitializeGame() {
     canvas.onclick = function(event) {
         overlayChatInput.style.display = "none";
         overlayChatInputIsVisible = false;
-        setAllInputIsFocusedAsFalse();
-        canvasIsFocused = true;
     }
     
     chatInput = document.getElementById("chatInput");
@@ -429,6 +425,16 @@ function baseInitializeGame() {
     gameUpdateSocket.onmessage = function(event) {
         handleGameUpdateRequest(JSON.parse(event.data));
     };
+    
+    var tempTagList = document.getElementsByTagName("input");
+    var index = 0;
+    while (index < tempTagList.length) {
+        var tempTag = tempTagList[index];
+        if (tempTag.type == "text") {
+            configureTextInputFocusHandlers(tempTag);
+        }
+        index += 1;
+    }
     
     // TODO: Custom initialization.
     
