@@ -57,6 +57,7 @@ function handleGameUpdateRequest(data) {
         var index = 0;
         while (index < tempCommandList.length) {
             var tempCommand = tempCommandList[index];
+            // TODO: Rework this.
             if (tempCommand.commandName == "addChatMessage") {
                 performAddChatMessageCommand(tempCommand);
             }
@@ -66,8 +67,6 @@ function handleGameUpdateRequest(data) {
             if (tempCommand.commandName == "addOnlinePlayer") {
                 performAddOnlinePlayerCommand(tempCommand);
             }
-            // TODO: Custom command actions.
-            
             index += 1;
         }
         // Repeat unprocessed client-side commands.

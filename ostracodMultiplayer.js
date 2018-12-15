@@ -30,7 +30,6 @@ module.exports = {
 
 var dbUtils = require("./dbUtils").dbUtils;
 var pageUtils = require("./pageUtils").pageUtils;
-var router = require("./router");
 
 OstracodMultiplayer.prototype.initializeServer = function(basePath) {
     
@@ -120,6 +119,7 @@ OstracodMultiplayer.prototype.initializeServer = function(basePath) {
         cookie: {maxAge: 24 * 60 * 60 * 1000}
     }))
     
+    var router = require("./router");
     this.app.use("/", router);
     
     // Catch 404 and forward to error handler.

@@ -10,6 +10,7 @@ var ostracodMultiplayer = require("./ostracodMultiplayer").ostracodMultiplayer;
 var pageUtils = require("./pageUtils").pageUtils;
 var dbUtils = require("./dbUtils").dbUtils;
 var accountUtils = require("./accountUtils").accountUtils;
+var gameUtils = require("./gameUtils").gameUtils;
 
 var checkAuthentication = pageUtils.checkAuthentication;
 var JSON_ERROR_OUTPUT = pageUtils.errorOutput.JSON_ERROR_OUTPUT;
@@ -225,6 +226,40 @@ router.get("/game", checkAuthentication(PAGE_ERROR_OUTPUT), function(req, res, n
             debugMode: (ostracodMultiplayer.mode == "development")
         }
     );
+});
+
+router.ws("/gameUpdate", checkAuthentication(SOCKET_ERROR_OUTPUT), function(ws, req, next) {
+    console.log("Opening socket.");
+    ws.on("message", function(message) {
+        var tempCommandList = JSON.parse(message);
+        if (ostracodMultiplayer.mode) {
+            setTimeout(function() {
+                performUpdate(tempCommandList);
+            }, 50 + Math.floor(Math.random() * 150));
+        } else {
+            performUpdate(tempCommandList);
+        }
+    });
+    function performUpdate(commandList) {
+        gameUtils.performUpdate(req.session.username, commandList, function(result) {
+            var tempRetryCount = 0;
+            function tryToSendResponse() {
+                try {
+                    ws.send(JSON.stringify(result));
+                } catch (error) {
+                    console.log(error);
+                    if (tempRetryCount < 3) {
+                        console.log("Trying to send response again.");
+                        setTimeout(tryToSendResponse, 100);
+                        tempRetryCount += 1;
+                    } else {
+                        console.log("Exceeded maximum number of retries.");
+                    }
+                }
+            }
+            tryToSendResponse();
+        });
+    }
 });
 
 router.get("/leaderboard", function(req, res, next) {
