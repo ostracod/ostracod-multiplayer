@@ -1,0 +1,13 @@
+{
+    "pageModules": [
+        {
+            "name": "stats",
+            "buttonLabel": "Stats",
+            "title": "Statistics",
+            "viewFile": "statsModule.html",
+            "shouldShowOnLoad": true
+        }
+    ]
+}
+
+

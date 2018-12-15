@@ -403,9 +403,6 @@ function baseInitializeGame() {
     overlayChatInput = document.getElementById("overlayChatInput");
     overlayChatOutput = document.getElementById("overlayChatOutput");
     
-    new Module("chat");
-    new Module("onlinePlayers");
-    
     window.onkeydown = baseKeyDownEvent;
     window.onkeyup = baseKeyUpEvent;
     

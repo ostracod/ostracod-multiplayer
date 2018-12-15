@@ -41,7 +41,7 @@ PageUtils.prototype.renderPage = function(res, path, options, parameters) {
 }
 
 PageUtils.prototype.getLocalViewPath = function(fileName) {
-    return pathUtils.join(__dirname, "views", fileName);
+    return pathUtils.join(ostracodMultiplayer.localViewsDirectory, fileName);
 }
 
 PageUtils.prototype.serveMessagePage = function(res, message, url, urlLabel) {

@@ -17,6 +17,8 @@ function OstracodMultiplayer() {
     this.basePath = null;
     this.configDirectory = null;
     this.serverConfig = null;
+    this.gameConfig = null;
+    this.localViewsDirectory = null;
 }
 
 var ostracodMultiplayer = new OstracodMultiplayer();
@@ -26,6 +28,7 @@ module.exports = {
 }
 
 var dbUtils = require("./dbUtils").dbUtils;
+var pageUtils = require("./pageUtils").pageUtils;
 var router = require("./router");
 
 OstracodMultiplayer.prototype.initializeServer = function(basePath) {
@@ -38,6 +41,34 @@ OstracodMultiplayer.prototype.initializeServer = function(basePath) {
         pathUtils.join(this.configDirectory, "serverConfig.json"),
         "utf8"
     ));
+    this.gameConfig = JSON.parse(fs.readFileSync(
+        pathUtils.join(this.configDirectory, "gameConfig.json"),
+        "utf8"
+    ));
+    this.localViewsDirectory = pathUtils.join(__dirname, "views");
+    
+    var tempViewDirectory = pathUtils.join(this.basePath, "views");
+    var index = 0;
+    while (index < this.gameConfig.pageModules.length) {
+        var tempModule = this.gameConfig.pageModules[index];
+        tempModule.viewPath = pathUtils.join(tempViewDirectory, tempModule.viewFile);
+        delete tempModule.viewFile;
+        index += 1;
+    }
+    this.gameConfig.pageModules.push({
+        name: "chat",
+        buttonLabel: "Chat",
+        title: "Chat",
+        viewPath: pageUtils.getLocalViewPath("chatModule.html"),
+        shouldShowOnLoad: false
+    });
+    this.gameConfig.pageModules.push({
+        name: "onlinePlayers",
+        buttonLabel: "Players",
+        title: "Online Players",
+        viewPath: pageUtils.getLocalViewPath("onlinePlayersModule.html"),
+        shouldShowOnLoad: true
+    });
     
     if (this.mode == "development") {
         console.log("WARNING: APPLICATION RUNNING IN DEVELOPMENT MODE!");
@@ -68,7 +99,7 @@ OstracodMultiplayer.prototype.initializeServer = function(basePath) {
     }
     expressWs(this.app, server);
     
-    this.app.set("views", pathUtils.join(__dirname, "views"));
+    this.app.set("views", this.localViewsDirectory);
     this.app.engine("html", mustacheExpress());
     
     var faviconPath = pathUtils.join(this.configDirectory, "public", "favicon.ico");

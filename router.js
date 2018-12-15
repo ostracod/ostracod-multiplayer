@@ -1,4 +1,5 @@
 
+var fs = require("fs");
 var pathUtils = require("path");
 var express = require("express");
 var router = express.Router();
@@ -197,6 +198,16 @@ router.get("/menu", checkAuthentication(PAGE_ERROR_OUTPUT), function(req, res, n
 });
 
 router.get("/game", checkAuthentication(PAGE_ERROR_OUTPUT), function(req, res, next) {
+    var index = 0;
+    var tempModuleList = ostracodMultiplayer.gameConfig.pageModules;
+    while (index < tempModuleList.length) {
+        var tempModule = tempModuleList[index];
+        if (typeof tempModule.viewContent === "undefined"
+                || ostracodMultiplayer.mode == "development") {
+            tempModule.viewContent = fs.readFileSync(tempModule.viewPath, "utf8");
+        }
+        index += 1;
+    }
     pageUtils.renderPage(
         res,
         pageUtils.getLocalViewPath("game.html"),
@@ -205,6 +216,7 @@ router.get("/game", checkAuthentication(PAGE_ERROR_OUTPUT), function(req, res, n
             shouldDisplayTitle: false
         },
         {
+            modules: tempModuleList,
             debugMode: (ostracodMultiplayer.mode == "development")
         }
     );
