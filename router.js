@@ -208,6 +208,9 @@ router.get("/game", checkAuthentication(PAGE_ERROR_OUTPUT), function(req, res, n
         }
         index += 1;
     }
+    var tempInstructionsPath = pageUtils.getConsumerViewPath(
+        ostracodMultiplayer.gameConfig.instructionsViewFile
+    );
     pageUtils.renderPage(
         res,
         pageUtils.getLocalViewPath("game.html"),
@@ -217,6 +220,8 @@ router.get("/game", checkAuthentication(PAGE_ERROR_OUTPUT), function(req, res, n
         },
         {
             modules: tempModuleList,
+            gameName: ostracodMultiplayer.serverConfig.gameName.toUpperCase(),
+            instructions: fs.readFileSync(tempInstructionsPath, "utf8"),
             debugMode: (ostracodMultiplayer.mode == "development")
         }
     );

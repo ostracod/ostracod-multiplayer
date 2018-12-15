@@ -44,6 +44,10 @@ PageUtils.prototype.getLocalViewPath = function(fileName) {
     return pathUtils.join(ostracodMultiplayer.localViewsDirectory, fileName);
 }
 
+PageUtils.prototype.getConsumerViewPath = function(fileName) {
+    return pathUtils.join(ostracodMultiplayer.consumerViewsDirectory, fileName);
+}
+
 PageUtils.prototype.serveMessagePage = function(res, message, url, urlLabel) {
     pageUtils.renderPage(
         res,

@@ -18,6 +18,7 @@ function OstracodMultiplayer() {
     this.configDirectory = null;
     this.serverConfig = null;
     this.gameConfig = null;
+    this.consumerViewsDirectory = null;
     this.localViewsDirectory = null;
 }
 
@@ -47,11 +48,11 @@ OstracodMultiplayer.prototype.initializeServer = function(basePath) {
     ));
     this.localViewsDirectory = pathUtils.join(__dirname, "views");
     
-    var tempViewDirectory = pathUtils.join(this.basePath, "views");
+    this.consumerViewsDirectory = pathUtils.join(this.basePath, "views");
     var index = 0;
     while (index < this.gameConfig.pageModules.length) {
         var tempModule = this.gameConfig.pageModules[index];
-        tempModule.viewPath = pathUtils.join(tempViewDirectory, tempModule.viewFile);
+        tempModule.viewPath = pageUtils.getConsumerViewPath(tempModule.viewFile);
         delete tempModule.viewFile;
         index += 1;
     }
