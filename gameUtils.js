@@ -13,6 +13,7 @@ function GameUtils() {
     this.chatMessageList = [];
     this.nextChatMessageId = 0;
     this.playerList = [];
+    this.commandListenerMap = {};
 }
 
 var gameUtils = new GameUtils();
@@ -52,7 +53,6 @@ Player.prototype.tick = function() {
 
 Player.prototype.persist = function(done) {
     var self = this;
-    console.log("Persisting " + self.username + "...");
     dbUtils.performTransaction(function(callback) {
         accountUtils.updateAccount(
             self.accountUid,
@@ -66,6 +66,11 @@ Player.prototype.persist = function(done) {
             }
         );
     }, done);
+}
+
+function CommandListener(isSynchronous, operation) {
+    this.isSynchronous = isSynchronous;
+    this.operation = operation;
 }
 
 GameUtils.prototype.addChatMessage = function(username, text) {
@@ -96,6 +101,10 @@ GameUtils.prototype.getPlayerByUsername = function(username, includeLoggedOut) {
         index += 1;
     }
     return null;
+}
+
+GameUtils.prototype.addCommandListener = function(commandName, isSynchronous, operation) {
+    this.commandListenerMap[commandName] = new CommandListener(isSynchronous, operation);
 }
 
 GameUtils.prototype.performUpdate = function(username, commandList, done) {
@@ -134,18 +143,25 @@ GameUtils.prototype.performUpdate = function(username, commandList, done) {
             }
             var tempCommand = commandList[index];
             index += 1;
-            // TODO: Rework this.
-            if (tempCommand.commandName == "startPlaying") {
-                performStartPlayingCommand(tempCommand, tempPlayer, tempCommandList);
-            }
-            if (tempCommand.commandName == "addChatMessage") {
-                performAddChatMessageCommand(tempCommand, tempPlayer, tempCommandList);
-            }
-            if (tempCommand.commandName == "getChatMessages") {
-                performGetChatMessagesCommand(tempCommand, tempPlayer, tempCommandList);
-            }
-            if (tempCommand.commandName == "getOnlinePlayers") {
-                performGetOnlinePlayersCommand(tempCommand, tempPlayer, tempCommandList);
+            var tempCommandListener = self.commandListenerMap[tempCommand.commandName];
+            if (typeof tempCommandListener === "undefined") {
+                console.log("ERROR: Unknown listener command \"" + tempCommand.commandName + "\".");
+            } else {
+                if (tempCommandListener.isSynchronous) {
+                    tempCommandListener.operation(
+                        tempCommand,
+                        tempPlayer,
+                        tempCommandList
+                    );
+                } else {
+                    tempCommandListener.operation(
+                        tempCommand,
+                        tempPlayer,
+                        tempCommandList,
+                        processNextCommand,
+                        errorHandler
+                    );
+                }
             }
         }
     }
@@ -198,55 +214,76 @@ function addAddChatMessageCommand(chatMessage, commandList) {
     });
 }
 
-function addRemoveAllOnlinePlayersCommand(commandList) {
+function addSetOnlinePlayersCommand(playerList, commandList) {
+    var tempItemList = [];
+    var index = 0;
+    while (index < playerList.length) {
+        var tempPlayer = playerList[index];
+        tempItemList.push({
+            username: tempPlayer.username,
+            score: tempPlayer.score
+        });
+        index += 1;
+    }
     commandList.push({
-        commandName: "removeAllOnlinePlayers"
+        commandName: "setOnlinePlayers",
+        players: tempItemList
     });
 }
 
-function addAddOnlinePlayerCommand(player, commandList) {
-    commandList.push({
-        commandName: "addOnlinePlayer",
-        username: player.username,
-        score: player.score
-    });
-}
-
-function performStartPlayingCommand(command, player, commandList) {
-    addSetLocalPlayerInfoCommand(player, commandList);
-}
-
-function performAddChatMessageCommand(command, player, commandList) {
-    gameUtils.addChatMessage(player.username, command.text);
-}
-
-function performGetChatMessagesCommand(command, player, commandList) {
-    var tempHighestId = -1;
-    var index = 0;
-    while (index < gameUtils.chatMessageList.length) {
-        var tempChatMessage = gameUtils.chatMessageList[index];
-        if (tempChatMessage.id > player.lastChatMessageId) {
-            addAddChatMessageCommand(tempChatMessage, commandList);
-        }
-        if (tempChatMessage.id > tempHighestId) {
-            tempHighestId = tempChatMessage.id;
-        }
-        index += 1;
+gameUtils.addCommandListener(
+    "startPlaying",
+    true,
+    function(command, player, commandList) {
+        addSetLocalPlayerInfoCommand(player, commandList);
     }
-    player.lastChatMessageId = tempHighestId;
-}
+);
 
-function performGetOnlinePlayersCommand(command, player, commandList) {
-    addRemoveAllOnlinePlayersCommand(commandList);
-    var index = 0;
-    while (index < gameUtils.playerList.length) {
-        var tempPlayer = gameUtils.playerList[index];
-        if (!tempPlayer.hasLoggedOut) {
-            addAddOnlinePlayerCommand(tempPlayer, commandList);
-        }
-        index += 1;
+
+gameUtils.addCommandListener(
+    "addChatMessage",
+    true,
+    function(command, player, commandList) {
+        gameUtils.addChatMessage(player.username, command.text);
     }
-}
+);
+
+gameUtils.addCommandListener(
+    "getChatMessages",
+    true,
+    function(command, player, commandList) {
+        var tempHighestId = -1;
+        var index = 0;
+        while (index < gameUtils.chatMessageList.length) {
+            var tempChatMessage = gameUtils.chatMessageList[index];
+            if (tempChatMessage.id > player.lastChatMessageId) {
+                addAddChatMessageCommand(tempChatMessage, commandList);
+            }
+            if (tempChatMessage.id > tempHighestId) {
+                tempHighestId = tempChatMessage.id;
+            }
+            index += 1;
+        }
+        player.lastChatMessageId = tempHighestId;
+    }
+);
+
+gameUtils.addCommandListener(
+    "getOnlinePlayers",
+    true,
+    function(command, player, commandList) {
+        var tempPlayerList = [];
+        var index = 0;
+        while (index < gameUtils.playerList.length) {
+            var tempPlayer = gameUtils.playerList[index];
+            if (!tempPlayer.hasLoggedOut) {
+                tempPlayerList.push(tempPlayer);
+            }
+            index += 1;
+        }
+        addSetOnlinePlayersCommand(tempPlayerList, commandList);
+    }
+);
 
 GameUtils.prototype.persistEverything = function(done) {
     if (this.isPersistingEverything) {

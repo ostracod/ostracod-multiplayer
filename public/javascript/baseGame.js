@@ -23,6 +23,9 @@ var gameUpdateSocket;
 var gameUpdateStartTimestamp;
 var moduleList = [];
 var focusedTextInput = null;
+var commandListenerMap = {};
+var commandRepeaterMap = {};
+var localUsername;
 
 var encodeHtmlEntity = function(text) {
     var tempList = [];
@@ -42,6 +45,14 @@ function betterModulus(number1, number2) {
     }
 }
 
+function addCommandListener(commandName, operation) {
+    commandListenerMap[commandName] = operation;
+}
+
+function addCommandRepeater(commandName, operation) {
+    commandRepeaterMap[commandName] = operation;
+}
+
 function performGameUpdateRequest() {
     isRequestingGameUpdate = true;
     gameUpdateStartTimestamp = Date.now() / 1000;
@@ -57,15 +68,11 @@ function handleGameUpdateRequest(data) {
         var index = 0;
         while (index < tempCommandList.length) {
             var tempCommand = tempCommandList[index];
-            // TODO: Rework this.
-            if (tempCommand.commandName == "addChatMessage") {
-                performAddChatMessageCommand(tempCommand);
-            }
-            if (tempCommand.commandName == "removeAllOnlinePlayers") {
-                performRemoveAllOnlinePlayersCommand(tempCommand);
-            }
-            if (tempCommand.commandName == "addOnlinePlayer") {
-                performAddOnlinePlayerCommand(tempCommand);
+            var tempOperation = commandListenerMap[tempCommand.commandName];
+            if (typeof tempOperation === "undefined") {
+                console.log("ERROR: Unknown listener command \"" + tempCommand.commandName + "\".");
+            } else {
+                tempOperation(tempCommand);
             }
             index += 1;
         }
@@ -73,8 +80,10 @@ function handleGameUpdateRequest(data) {
         var index = 0;
         while (index < gameUpdateCommandList.length) {
             var tempCommand = gameUpdateCommandList[index];
-            // TODO: Custom command actions.
-            
+            var tempOperation = commandRepeaterMap[tempCommand.commandName];
+            if (typeof tempOperation !== "undefined") {
+                tempOperation(tempCommand);
+            }
             index += 1;
         }
     } else {
@@ -112,7 +121,11 @@ function addGetOnlinePlayersCommand() {
     });
 }
 
-function performAddChatMessageCommand(command) {
+addCommandListener("setLocalPlayerInfo", function(command) {
+    localUsername = command.username;
+});
+
+addCommandListener("addChatMessage", function(command) {
     var tempPlayerName;
     if (command.username === null) {
         tempPlayerName = null;
@@ -138,17 +151,19 @@ function performAddChatMessageCommand(command) {
         chatOutput.scrollTop = chatOutput.scrollHeight;
     }
     new OverlayChatMessage(tempPlayerName, tempText);
-}
+});
 
-function performRemoveAllOnlinePlayersCommand(command) {
+addCommandListener("setOnlinePlayers", function(command) {
     var tempTag = document.getElementById("onlinePlayersDiv");
-    tempTag.innerHTML = "";
-}
-
-function performAddOnlinePlayerCommand(command) {
-    var tempTag = document.getElementById("onlinePlayersDiv");
-    tempTag.innerHTML += "<strong>" + encodeHtmlEntity(command.username) + " (" + command.score + ")</strong><br />";
-}
+    var tempContentList = [];
+    var index = 0;
+    while (index < command.players.length) {
+        var tempPlayer = command.players[index];
+        tempContentList.push("<strong>" + encodeHtmlEntity(tempPlayer.username) + " (" + tempPlayer.score + ")</strong><br />");
+        index += 1;
+    }
+    tempTag.innerHTML = tempContentList.join("");
+});
 
 function OverlayChatMessage(playerName, text) {
     this.tag = document.createElement("div");
