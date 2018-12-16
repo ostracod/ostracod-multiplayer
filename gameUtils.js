@@ -14,6 +14,7 @@ function GameUtils() {
     this.nextChatMessageId = 0;
     this.playerList = [];
     this.commandListenerMap = {};
+    this.gameDelegate = null;
 }
 
 var gameUtils = new GameUtils();
@@ -35,18 +36,19 @@ function Player(account) {
     this.score = account.score;
     this.lastActivityTime = Date.now() / 1000;
     this.lastChatMessageId = gameUtils.nextChatMessageId - 10;
-    this.hasLoggedOut = false;
+    this.hasLeftGame = false;
     gameUtils.announceMessageInChat(this.username + " has joined the game.");
 }
 
 Player.prototype.tick = function() {
-    if (this.hasLoggedOut) {
+    if (this.hasLeftGame) {
         return;
     }
     var tempTime = Date.now() / 1000;
     if (tempTime > this.lastActivityTime + 10) {
-        this.hasLoggedOut = true;
+        this.hasLeftGame = true;
         gameUtils.announceMessageInChat(this.username + " has left the game.");
+        gameUtils.gameDelegate.playerLeaveEvent(this);
         return;
     }
 }
@@ -87,15 +89,15 @@ GameUtils.prototype.announceMessageInChat = function(text) {
     this.addChatMessage(null, text);
 }
 
-GameUtils.prototype.getPlayerByUsername = function(username, includeLoggedOut) {
-    if (typeof includeLoggedOut === "undefined") {
-        includeLoggedOut = false;
+GameUtils.prototype.getPlayerByUsername = function(username, includeStale) {
+    if (typeof includeStale === "undefined") {
+        includeStale = false;
     }
     var index = 0;
     while (index < this.playerList.length) {
         var tempPlayer = this.playerList[index];
         if (tempPlayer.username == username
-                && (!tempPlayer.hasLoggedOut || includeLoggedOut)) {
+                && (!tempPlayer.hasLeftGame || includeStale)) {
             return tempPlayer;
         }
         index += 1;
@@ -182,6 +184,7 @@ GameUtils.prototype.performUpdate = function(username, commandList, done) {
                     }
                     tempPlayer = new Player(result);
                     self.playerList.push(tempPlayer);
+                    self.gameDelegate.playerEnterEvent(tempPlayer);
                     callback();
                 });
             }, function() {
@@ -193,7 +196,10 @@ GameUtils.prototype.performUpdate = function(username, commandList, done) {
             }
         );
     } else {
-        tempPlayer.hasLoggedOut = false;
+        if (tempPlayer.hasLeftGame) {
+            tempPlayer.hasLeftGame = false;
+            self.gameDelegate.playerEnterEvent(tempPlayer);
+        }
         startProcessingCommands();
     }
 }
@@ -276,7 +282,7 @@ gameUtils.addCommandListener(
         var index = 0;
         while (index < gameUtils.playerList.length) {
             var tempPlayer = gameUtils.playerList[index];
-            if (!tempPlayer.hasLoggedOut) {
+            if (!tempPlayer.hasLeftGame) {
                 tempPlayerList.push(tempPlayer);
             }
             index += 1;
@@ -298,24 +304,27 @@ GameUtils.prototype.persistEverything = function(done) {
     var index = 0;
     function persistNextPlayer() {
         if (index >= self.playerList.length) {
-            var tempIndex = self.playerList.length - 1;
-            while (tempIndex >= 0) {
-                var tempPlayer = self.playerList[tempIndex];
-                if (tempPlayer.hasLoggedOut) {
-                    self.playerList.splice(tempIndex, 1);
-                }
-                tempIndex -= 1;
-            }
-            self.isPersistingEverything = false;
-            if (ostracodMultiplayer.mode == "development") {
-                console.log("Saved world state.");
-            }
-            done();
+            self.gameDelegate.persistEvent(removeStalePlayers);
             return;
         }
         var tempPlayer = self.playerList[index];
         index += 1;
         tempPlayer.persist(persistNextPlayer);
+    }
+    function removeStalePlayers() {
+        var tempIndex = self.playerList.length - 1;
+        while (tempIndex >= 0) {
+            var tempPlayer = self.playerList[tempIndex];
+            if (tempPlayer.hasLeftGame) {
+                self.playerList.splice(tempIndex, 1);
+            }
+            tempIndex -= 1;
+        }
+        self.isPersistingEverything = false;
+        if (ostracodMultiplayer.mode == "development") {
+            console.log("Saved world state.");
+        }
+        done();
     }
     persistNextPlayer();
 }
@@ -355,8 +364,11 @@ GameUtils.prototype.gameTimerEvent = function() {
     }
 }
 
-setInterval(function() {
-    gameUtils.gameTimerEvent();
-}, 1000 / gameUtils.framesPerSecond);
+GameUtils.prototype.initialize = function() {
+    gameUtils.gameDelegate = ostracodMultiplayer.gameDelegate;
+    setInterval(function() {
+        gameUtils.gameTimerEvent();
+    }, 1000 / gameUtils.framesPerSecond);
+}
 
 

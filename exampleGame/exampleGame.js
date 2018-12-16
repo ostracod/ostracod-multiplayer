@@ -9,6 +9,22 @@ function GameDelegate() {
 
 var gameDelegate = new GameDelegate();
 
+// Called whenever a player enters the game.
+GameDelegate.prototype.playerEnterEvent = function(player) {
+    console.log(player.username + " entered!");
+}
+
+// Called whenever a player leaves the game.
+GameDelegate.prototype.playerLeaveEvent = function(player) {
+    console.log(player.username + " left!");
+}
+
+// Called whenever the server is persisting server state.
+GameDelegate.prototype.persistEvent = function(done) {
+    console.log("Persist event!");
+    done();
+}
+
 // Define how to communicate the player's score to the client.
 function addSetScoreCommand(player, commandList) {
     commandList.push({

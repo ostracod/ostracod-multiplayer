@@ -31,6 +31,7 @@ module.exports = {
 
 var dbUtils = require("./dbUtils").dbUtils;
 var pageUtils = require("./pageUtils").pageUtils;
+var gameUtils = require("./gameUtils").gameUtils;
 
 OstracodMultiplayer.prototype.initializeServer = function(basePath, gameDelegate) {
     
@@ -146,6 +147,7 @@ OstracodMultiplayer.prototype.initializeServer = function(basePath, gameDelegate
     });
     
     dbUtils.initialize();
+    gameUtils.initialize();
     
     var portNumber = this.serverConfig.port;
     
