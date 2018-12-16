@@ -8,7 +8,10 @@
             "shouldShowOnLoad": true
         }
     ],
-    "instructionsViewFile": "instructions.html"
+    "instructionsViewFile": "instructions.html",
+    "canvasWidth": 1000,
+    "canvasHeight": 800,
+    "framesPerSecond": 25
 }
 
 

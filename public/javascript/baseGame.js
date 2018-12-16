@@ -1,10 +1,9 @@
 
 var canvas;
 var context;
-// TODO: Custom dimensions and frames per second.
-var canvasWidth = 600;
-var canvasHeight = 600;
-var framesPerSecond = 25;
+var canvasWidth;
+var canvasHeight;
+var framesPerSecond;
 var shiftKeyIsHeld = false;
 var chatInput;
 var chatOutput;

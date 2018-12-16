@@ -217,10 +217,14 @@ router.get("/game", checkAuthentication(PAGE_ERROR_OUTPUT), function(req, res, n
         pageUtils.getLocalViewPath("game.html"),
         {
             scripts: ["javascript/baseGame.js"],
-            shouldDisplayTitle: false
+            shouldDisplayTitle: false,
+            contentWidth: ostracodMultiplayer.gameConfig.canvasWidth / 2 + 380
         },
         {
             modules: tempModuleList,
+            canvasWidth: ostracodMultiplayer.gameConfig.canvasWidth,
+            canvasHeight: ostracodMultiplayer.gameConfig.canvasHeight,
+            framesPerSecond: ostracodMultiplayer.gameConfig.framesPerSecond,
             gameName: ostracodMultiplayer.serverConfig.gameName.toUpperCase(),
             instructions: fs.readFileSync(tempInstructionsPath, "utf8"),
             debugMode: (ostracodMultiplayer.mode == "development")

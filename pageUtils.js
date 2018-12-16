@@ -30,13 +30,20 @@ PageUtils.prototype.renderPage = function(res, path, options, parameters) {
     } else {
         tempShouldDisplayTitle = options.shouldDisplayTitle;
     }
+    var tempContentWidth;
+    if (typeof options.contentWidth === "undefined") {
+        tempContentWidth = 680;
+    } else {
+        tempContentWidth = options.contentWidth;
+    }
     var tempTemplate = fs.readFileSync(path, "utf8");
     var tempContent = Mustache.render(tempTemplate, parameters);
     res.render("template.html", {
         gameName: ostracodMultiplayer.serverConfig.gameName.toUpperCase(),
         scripts: tempScriptList,
         shouldDisplayTitle: tempShouldDisplayTitle,
-        content: tempContent
+        content: tempContent,
+        contentWidth: tempContentWidth
     });
 }
 
