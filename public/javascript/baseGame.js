@@ -24,7 +24,6 @@ var moduleList = [];
 var focusedTextInput = null;
 var commandListenerMap = {};
 var commandRepeaterMap = {};
-var localUsername;
 var clientDelegate;
 
 var encodeHtmlEntity = function(text) {
@@ -122,7 +121,7 @@ function addGetOnlinePlayersCommand() {
 }
 
 addCommandListener("setLocalPlayerInfo", function(command) {
-    localUsername = command.username;
+    clientDelegate.setLocalPlayerInfo(command);
 });
 
 addCommandListener("addChatMessage", function(command) {

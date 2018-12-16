@@ -20,6 +20,7 @@ function OstracodMultiplayer() {
     this.gameConfig = null;
     this.consumerViewsDirectory = null;
     this.localViewsDirectory = null;
+    this.gameDelegate = null;
 }
 
 var ostracodMultiplayer = new OstracodMultiplayer();
@@ -31,11 +32,12 @@ module.exports = {
 var dbUtils = require("./dbUtils").dbUtils;
 var pageUtils = require("./pageUtils").pageUtils;
 
-OstracodMultiplayer.prototype.initializeServer = function(basePath) {
+OstracodMultiplayer.prototype.initializeServer = function(basePath, gameDelegate) {
     
     this.app = express();
     this.mode = this.app.get("env");
     this.basePath = basePath;
+    this.gameDelegate = gameDelegate;
     this.configDirectory = pathUtils.join(basePath, "ostracodMultiplayerConfig");
     this.serverConfig = JSON.parse(fs.readFileSync(
         pathUtils.join(this.configDirectory, "serverConfig.json"),

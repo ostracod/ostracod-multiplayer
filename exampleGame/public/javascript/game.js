@@ -1,10 +1,33 @@
 
+var localPlayerScore;
+
+function displayLocalPlayerScore() {
+    document.getElementById("score").innerHTML = localPlayerScore;
+}
+
+function addEarnPointsCommand() {
+    gameUpdateCommandList.push({
+        commandName: "earnPoints",
+        pointAmount: 5
+    });
+}
+
+addCommandListener("setScore", function(command) {
+    localPlayerScore = command.score;
+    displayLocalPlayerScore();
+});
+
 function ClientDelegate() {
     
 }
 
 ClientDelegate.prototype.initialize = function() {
     console.log("Initialized!");
+}
+
+ClientDelegate.prototype.setLocalPlayerInfo = function(command) {
+    localPlayerScore = command.score;
+    displayLocalPlayerScore();
 }
 
 ClientDelegate.prototype.timerEvent = function() {
@@ -14,12 +37,22 @@ ClientDelegate.prototype.timerEvent = function() {
 }
 
 ClientDelegate.prototype.keyDownEvent = function(keyCode) {
-    console.log("Key pressed! " + keyCode);
+    // If some text input is focused, ignore keystrokes.
+    if (focusedTextInput !== null) {
+        return true;
+    }
+    // Space.
+    if (keyCode == 32) {
+        addEarnPointsCommand();
+        // Override page scrolling.
+        return false;
+    }
     return true;
 }
 
 ClientDelegate.prototype.keyUpEvent = function(keyCode) {
-    console.log("Key released! " + keyCode);
+    // You could put something here if you wanted to.
+    
     return true;
 }
 
