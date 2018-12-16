@@ -186,16 +186,37 @@ router.post("/changePasswordAction", checkAuthentication(JSON_ERROR_OUTPUT), fun
 });
 
 router.get("/menu", checkAuthentication(PAGE_ERROR_OUTPUT), function(req, res, next) {
-    tempUsername = req.session.username;
-    pageUtils.renderPage(
-        res,
-        pageUtils.getLocalViewPath("menu.html"),
-        {},
-        {
-            username: tempUsername,
-            score: 0 // TODO: Populate score.
-        }
-    );
+    var tempUsername = req.session.username;
+    var tempScore;
+    function renderPage() {
+        pageUtils.renderPage(
+            res,
+            pageUtils.getLocalViewPath("menu.html"),
+            {},
+            {
+                username: tempUsername,
+                score: tempScore
+            }
+        );
+    }
+    var tempPlayer = gameUtils.getPlayerByUsername(tempUsername, true);
+    if (tempPlayer === null) {
+        dbUtils.performTransaction(function(done) {
+            accountUtils.getAccountByUsername(tempUsername, function(error, result) {
+                if (error) {
+                    pageUtils.reportDatabaseErrorWithPage(error, req, res);
+                    done();
+                    return;
+                }
+                tempScore = result.score;
+                renderPage();
+                done();
+            });
+        }, function() {});
+    } else {
+        tempScore = tempPlayer.score;
+        renderPage();
+    }
 });
 
 router.get("/game", checkAuthentication(PAGE_ERROR_OUTPUT), function(req, res, next) {
