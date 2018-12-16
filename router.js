@@ -212,11 +212,19 @@ router.get("/game", checkAuthentication(PAGE_ERROR_OUTPUT), function(req, res, n
     var tempInstructionsPath = pageUtils.getConsumerViewPath(
         ostracodMultiplayer.gameConfig.instructionsViewFile
     );
+    var tempScriptList = ["javascript/baseGame.js"];
+    var tempScriptList2 = ostracodMultiplayer.gameConfig.scripts;
+    var index = 0;
+    while (index < tempScriptList2.length) {
+        var tempPath = tempScriptList2[index];
+        tempScriptList.push(tempPath);
+        index += 1;
+    }
     pageUtils.renderPage(
         res,
         pageUtils.getLocalViewPath("game.html"),
         {
-            scripts: ["javascript/baseGame.js"],
+            scripts: tempScriptList,
             shouldDisplayTitle: false,
             contentWidth: ostracodMultiplayer.gameConfig.canvasWidth / 2 + 380
         },

@@ -25,6 +25,7 @@ var focusedTextInput = null;
 var commandListenerMap = {};
 var commandRepeaterMap = {};
 var localUsername;
+var clientDelegate;
 
 var encodeHtmlEntity = function(text) {
     var tempList = [];
@@ -324,8 +325,7 @@ function baseKeyDownEvent(event) {
             overlayChatInput.focus();
         }
     }
-    // TODO: Custom key bindings.
-    
+    return clientDelegate.keyDownEvent(keyCode);
 }
 
 function baseKeyUpEvent(event) {
@@ -334,8 +334,7 @@ function baseKeyUpEvent(event) {
     if (keyCode == 16) {
         shiftKeyIsHeld = false;
     }
-    // TODO: Custom key bindings.
-    
+    return clientDelegate.keyUpEvent(keyCode);
 }
 
 function baseTimerEvent() {
@@ -391,8 +390,7 @@ function baseTimerEvent() {
         }
     }
     
-    // TODO: Custom timer actions.
-    
+    clientDelegate.timerEvent();
 }
 
 function baseInitializeGame() {
@@ -446,8 +444,7 @@ function baseInitializeGame() {
         index += 1;
     }
     
-    // TODO: Custom initialization.
-    
+    clientDelegate.initialize();
 }
 
 
