@@ -184,7 +184,7 @@ Members of `gameUtils`:
 * `gameUtils.addCommandListener(commandName, isSynchronous, operation)`: Perform an operation if the client sends a particular command.
     * If synchronous, `operation` accepts the arguments `(command, player, commandList)`.
     * If asynchronous, `operation` accepts the arguments `(command, player, commandList, done, errorHandler)`.
-            * `errorHandler` accepts a single argument `(message)`.
+        * `errorHandler` accepts a single argument `(message)`.
     * In both cases, `command` is the incoming command, `player` is the client player, and `commandList` is a list of response commands.
 
 Members of `Player`:
