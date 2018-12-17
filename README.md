@@ -71,8 +71,16 @@ Format of `gameConfig.json`:
         }
     ],
     "instructionsViewFile": String
+    "scripts": [String],
+    "canvasWidth": Number,
+    "canvasHeight": Number,
+    "framesPerSecond": Number
 }
 ```
+
+* `instructionsViewFile` should be a file name inside your `views` directory.
+* `scripts` is a list of script paths to include in the game client page.
+* `canvasWidth` and `canvasHeight` are double-resolution for retina displays.
 
 Format of `databaseConfig.json`:
 
@@ -129,7 +137,7 @@ node ./node_modules/ostracod-multiplayer/schemaTool.js setup
 
 You can also replace `setup` with `verify` or `destroy` for other actions.
 
-## Usage
+## Server-Side Usage
 
 This module exposes the following members:
 
@@ -137,29 +145,59 @@ This module exposes the following members:
 * `pageUtils`: Contains various functions for serving pages.
 * `dbUtils`: Contains various functions for accessing the database.
 * `accountUtils`: Contains various functions for processing user accounts.
+* `gameUtils`: Controls real-time aspects of gameplay.
 
-`ostracodMultiplayer` contains the following members:
+Members of `ostracodMultiplayer`:
 
-* `ostracodMultiplayer.initializeServer(basePath)`: Starts running the server. `basePath` should point to the top level of your project.
+* `ostracodMultiplayer.initializeServer(basePath, gameDelegate)`: Starts running the server. `basePath` should point to the top level of your project.
 * `ostracodMultiplayer.mode`: Either `"development"` or `"production"`.
 
-`pageUtils` contains the follow members:
+Members of `pageUtils`:
 
-* `pageUtils.renderPage(res, path, parameters)`: Renders the page at `path` with given parameters using Mustache. `path` must be fully resolved.
+* `pageUtils.renderPage(res, path, options, parameters)`: Renders the page at `path` with given parameters using Mustache.
+    * `path` must be fully resolved.
+    * `options` may contain any of the following members:
+        * `scripts`: List of client-side script paths.
+        * `shouldDisplayTitle`
+        * `contentWidth`
 * `pageUtils.isAuthenticated(req)`: Returns whether the user is logged in based on the given request.
 * `pageUtils.errorOutput`: Enumeration containing `JSON_ERROR_OUTPUT`, `PAGE_ERROR_OUTPUT`, and `SOCKET_ERROR_OUTPUT`.
 * `pageUtils.checkAuthentication(errorOutput)`: Prevents a user from accessing a page if they are not logged in.
 
-`dbUtils` contains the following members:
+Members of `dbUtils`:
 
 * `dbUtils.performTransaction(operation, done)`: Performs the operation with a lock on the database.
 * `dbUtils.performQuery(query, parameterList, done)`: Performs a single query on the database. Will not work outside of `performTransaction`.
 
-`accountUtils` contains the following members:
+Members of `accountUtils`:
 
 * `accountUtils.getAccountByUsername(username, done)`: Retrieves a user by username. Must be performed in a DB transaction.
 * `accountUtils.updateAccount(uid, valueSet, done)`: Modifies fields in a user account. Must be performed in a DB transaction.
 * `accountUtils.removeAccount(uid, done)`: Removes a user account. Must be performed in a DB transaction.
+
+Members of `gameUtils`:
+
+* `gameUtils.isPersistingEverything`: Indicates whether server state is being saved to non-volatile storage.
+* `gameUtils.playerList`: List of players in the game and non-persisted players.
+* `gameUtils.announceMessageInChat(text)`: Send a message to all players.
+* `gameUtils.getPlayerByUsername(username, includeStale)`: Retrieves a player. If `includeStale` is true, output includes players which have left the game.
+* `gameUtils.addCommandListener(commandName, isSynchronous, operation)`: Perform an operation if the client sends a particular command.
+    * If synchronous, `operation` accepts the arguments `(command, player, commandList)`.
+    * If asynchronous, `operation` accepts the arguments `(command, player, commandList, done, errorHandler)`.
+            * `errorHandler` accepts a single argument `(message)`.
+    * In both cases, `command` is the incoming command, `player` is the client player, and `commandList` is a list of response commands.
+
+Members of `Player`:
+
+* `player.username`
+* `player.score`
+* `player.hasLeftGame`
+
+Your project must create a `GameDelegate` and pass it into `ostracodMultiplayer.initialize`. `GameDelegate` must have the following members:
+
+* `gameDelegate.playerEnterEvent(player)`: Called whenever a player enters the game.
+* `gameDelegate.playerLeaveEvent(player)`: Called whenever a player leaves the game.
+* `gameDelegate.persistEvent(done)`: Called when the server periodically persists game state. `GameDelegate` must always execute the `done` callback.
 
 To run your project for development, perform this command:
 
@@ -174,5 +212,9 @@ For a production environment, perform something like this:
 ```
 NODE_ENV=production nohup node (Your Script) > serverMessages.txt 2>&1 &
 ```
+
+## Client-Side Usage
+
+TODO: Write this stuff!
 
 
