@@ -12,7 +12,8 @@
     "scripts": ["javascript/game.js"],
     "canvasWidth": 1000,
     "canvasHeight": 800,
-    "framesPerSecond": 25
+    "framesPerSecond": 25,
+    "maximumPlayerCount": 15
 }
 
 

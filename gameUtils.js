@@ -7,7 +7,7 @@ function GameUtils() {
     this.framesPerSecond = 10;
     this.persistPeriod = 60; // Measured in seconds.
     this.hasStopped = false;
-    this.maximumPlayerCount = 15; // TODO: This should be configurable.
+    this.maximumPlayerCount = null;
     this.persistDelay = this.persistPeriod * this.framesPerSecond;
     this.isPersistingEverything = false;
     this.chatMessageList = [];
@@ -365,6 +365,7 @@ GameUtils.prototype.gameTimerEvent = function() {
 }
 
 GameUtils.prototype.initialize = function() {
+    gameUtils.maximumPlayerCount = ostracodMultiplayer.gameConfig.maximumPlayerCount;
     gameUtils.gameDelegate = ostracodMultiplayer.gameDelegate;
     setInterval(function() {
         gameUtils.gameTimerEvent();

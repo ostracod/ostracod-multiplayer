@@ -74,7 +74,8 @@ Format of `gameConfig.json`:
     "scripts": [String],
     "canvasWidth": Number,
     "canvasHeight": Number,
-    "framesPerSecond": Number
+    "framesPerSecond": Number,
+    "maximumPlayerCount": Number
 }
 ```
 
