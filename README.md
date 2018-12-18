@@ -217,6 +217,47 @@ NODE_ENV=production nohup node (Your Script) > serverMessages.txt 2>&1 &
 
 ## Client-Side Usage
 
-TODO: Write this stuff!
+The global scope in the game page exposes the following members:
+
+* `Pos`: Represents a 2D position.
+* `Color`: Represents an RGB color.
+* `canvas` and `context`: For rendering graphics.
+* `canvasWidth` and `canvasHeight`: Canvas dimensions as defined in your config file.
+* `framesPerSecond`: FPS as defined in your config file.
+* `shiftKeyIsHeld`: Whether the user is pressing the shift key.
+* `gameUpdateCommandList`: List of commands to send to the server.
+* `focusedTextInput`: HTML tag of focused text input.
+* `clientDelegate`: You must assign a value to this in your script.
+* `addCommandListener(commandName, operation)`: Perform an operation whenever the client receives a server command. `operation` accepts a single `(command)` argument.
+* `addCommandRepeater(commandName, operation)`: Invoked for any unsent commands after receiving server commands. `operation` accepts a single `(command)` argument.
+* `clearCanvas()`: Erases contents of the canvas.
+
+Members of `Pos`:
+
+* `pos.x` and `pos.y`
+* `pos.set(pos)`
+* `pos.add(pos)`
+* `pos.subtract(pos)`
+* `pos.scale(number)`
+* `pos.copy()`
+* `pos.equals(pos)`
+* `pos.getDistance(pos)`
+* `pos.toString()`
+
+Members of `Color`:
+
+* `color.r`, `color.g`, and `color.b`
+* `color.copy()`
+* `color.scale(number)`
+* `color.equals(color)`
+* `color.toString()`
+
+Your client script must create a `ClientDelegate` and assign it to `clientDelegate`. `ClientDelegate` must have the following members:
+
+* `clientDelegate.initialize()`: Called after the whole page is loaded.
+* `clientDelegate.setLocalPlayerInfo(command)`: Called after the client receives local player information. `command` contains the members `username` and `score`.
+* `clientDelegate.timerEvent()`: Called for each client frame.
+* `clientDelegate.keyDownEvent(keyCode)`: Called whenever the user presses a key. Return false to override default browser action, and true otherwise.
+* `clientDelegate.keyUpEvent(keyCode)`: Called whenever the user releases a key. Return false to override default browser action, and true otherwise.
 
 
