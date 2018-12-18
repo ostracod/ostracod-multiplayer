@@ -2,7 +2,8 @@
     "gameName": "ExampleGame",
     "author": "Smith Smithberg",
     "port": 2628,
-    "secret": "SUPER_SECRET"
+    "secret": "SUPER_SECRET",
+    "welcomeViewFile": "welcome.html"
 }
 
 

@@ -53,7 +53,8 @@ Format of `serverConfig.json`:
     "gameName": String,
     "author": String,
     "port": Number,
-    "secret": String (For cookies)
+    "secret": String (For cookies),
+    "welcomeViewFile": String
 }
 ```
 
@@ -79,7 +80,7 @@ Format of `gameConfig.json`:
 }
 ```
 
-* `instructionsViewFile` should be a file name inside your `views` directory.
+* `welcomeViewFile` and `instructionsViewFile` should be file names inside your `views` directory.
 * `scripts` is a list of script paths to include in the game client page.
 * `canvasWidth` and `canvasHeight` are double-resolution for retina displays.
 

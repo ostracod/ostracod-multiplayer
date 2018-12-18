@@ -26,11 +26,17 @@ router.get("/", function(req, res, next) {
 });
 
 router.get("/login", function(req, res, next) {
+    var tempWelcomePath = pageUtils.getConsumerViewPath(
+        ostracodMultiplayer.serverConfig.welcomeViewFile
+    );
     pageUtils.renderPage(
         res,
         pageUtils.getLocalViewPath("login.html"),
         {scripts: ["javascript/login.js"]},
-        {author: ostracodMultiplayer.serverConfig.author}
+        {
+            author: ostracodMultiplayer.serverConfig.author,
+            welcomeContent: fs.readFileSync(tempWelcomePath, "utf8")
+        }
     );
 });
 
