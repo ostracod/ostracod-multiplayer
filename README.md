@@ -252,7 +252,7 @@ Members of `Color`:
 * `color.equals(color)`
 * `color.toString()`
 
-Your client script must create a `ClientDelegate` and assign it to `clientDelegate`. `ClientDelegate` must have the following members:
+Your client script must create a `ClientDelegate` and assign it to the global variable `clientDelegate`. `ClientDelegate` must have the following members:
 
 * `clientDelegate.initialize()`: Called after the whole page is loaded.
 * `clientDelegate.setLocalPlayerInfo(command)`: Called after the client receives local player information. `command` contains the members `username` and `score`.
