@@ -34,6 +34,12 @@ ClientDelegate.prototype.setLocalPlayerInfo = function(command) {
     displayLocalPlayerScore();
 }
 
+// Called once before every socket communication.
+ClientDelegate.prototype.addCommandsBeforeUpdateRequest = function() {
+    // This is a good place to add commands which must happen very often.
+    
+}
+
 // Called on every frame.
 ClientDelegate.prototype.timerEvent = function() {
     clearCanvas();

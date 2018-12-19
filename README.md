@@ -263,6 +263,7 @@ Your client script must create a `ClientDelegate` and assign it to the global va
 
 * `clientDelegate.initialize()`: Called after the whole page is loaded.
 * `clientDelegate.setLocalPlayerInfo(command)`: Called after the client receives local player information. `command` contains the members `username` and `score`.
+* `clientDelegate.addCommandsBeforeUpdateRequest()`: Called before sending each bundle of commands through the web socket.
 * `clientDelegate.timerEvent()`: Called for each client frame.
 * `clientDelegate.keyDownEvent(keyCode)`: Called whenever the user presses a key. Return false to override default browser action, and true otherwise.
 * `clientDelegate.keyUpEvent(keyCode)`: Called whenever the user releases a key. Return false to override default browser action, and true otherwise.

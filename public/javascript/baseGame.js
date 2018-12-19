@@ -385,6 +385,7 @@ function baseTimerEvent() {
         if (gameUpdateRequestDelay <= 0) {
             addGetChatMessagesCommand();
             addGetOnlinePlayersCommand();
+            clientDelegate.addCommandsBeforeUpdateRequest();
             performGameUpdateRequest();
         }
     }
