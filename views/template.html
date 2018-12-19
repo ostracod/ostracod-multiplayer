@@ -5,6 +5,9 @@
             <script src="{{{.}}}"></script>
         {{/scripts}}
         <link type="text/css" rel="stylesheet" media="all" href="stylesheets/global.css" />
+        {{#stylesheets}}
+            <link type="text/css" rel="stylesheet" media="all" href="{{{.}}}" />
+        {{/stylesheets}}
     </head>
     <body>
         <div id="content" style="width: {{contentWidth}}px;">

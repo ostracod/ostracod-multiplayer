@@ -252,6 +252,7 @@ router.get("/game", checkAuthentication(PAGE_ERROR_OUTPUT), function(req, res, n
         pageUtils.getLocalViewPath("game.html"),
         {
             scripts: tempScriptList,
+            stylesheets: ostracodMultiplayer.gameConfig.stylesheets,
             shouldDisplayTitle: false,
             contentWidth: ostracodMultiplayer.gameConfig.canvasWidth / 2 + 380
         },

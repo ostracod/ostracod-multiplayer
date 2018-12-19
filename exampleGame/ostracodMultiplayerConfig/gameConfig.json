@@ -10,6 +10,7 @@
     ],
     "instructionsViewFile": "instructions.html",
     "scripts": ["javascript/game.js"],
+    "stylesheets": [],
     "canvasWidth": 1000,
     "canvasHeight": 800,
     "framesPerSecond": 25,

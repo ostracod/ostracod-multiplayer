@@ -73,6 +73,7 @@ Format of `gameConfig.json`:
     ],
     "instructionsViewFile": String
     "scripts": [String],
+    "stylesheets": [String],
     "canvasWidth": Number,
     "canvasHeight": Number,
     "framesPerSecond": Number,
@@ -82,6 +83,7 @@ Format of `gameConfig.json`:
 
 * `welcomeViewFile` and `instructionsViewFile` should be file names inside your `views` directory.
 * `scripts` is a list of script paths to include in the game client page.
+* `stylesheets` is a list of stylesheet paths to include in the game client page.
 * `canvasWidth` and `canvasHeight` are double-resolution for retina displays.
 
 Format of `databaseConfig.json`:
@@ -160,6 +162,7 @@ Members of `pageUtils`:
     * `path` must be fully resolved.
     * `options` may contain any of the following members:
         * `scripts`: List of client-side script paths.
+        * `stylesheets`: List of client-side stylesheet paths.
         * `shouldDisplayTitle`
         * `contentWidth`
 * `pageUtils.isAuthenticated(req)`: Returns whether the user is logged in based on the given request.
