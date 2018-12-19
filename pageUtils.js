@@ -62,7 +62,7 @@ PageUtils.prototype.serveMessagePage = function(res, message, url, urlLabel) {
 }
 
 PageUtils.prototype.generateReturnUrl = function(req) {
-    if (req.session.username) {
+    if (pageUtils.isAuthenticated(req)) {
         return {
             url: "/menu",
             urlLabel: "Return to Main Menu"
@@ -94,6 +94,10 @@ PageUtils.prototype.reportDatabaseError = function(error, errorOutput, req, res)
     if (errorOutput == pageUtils.errorOutput.PAGE_ERROR_OUTPUT) {
         pageUtils.reportDatabaseErrorWithPage(error, req, res);
     }
+}
+
+PageUtils.prototype.getUsername = function(req) {
+    return req.session.username;
 }
 
 PageUtils.prototype.isAuthenticated = function(req) {

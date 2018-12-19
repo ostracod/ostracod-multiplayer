@@ -153,7 +153,10 @@ This module exposes the following members:
 
 Members of `ostracodMultiplayer`:
 
-* `ostracodMultiplayer.initializeServer(basePath, gameDelegate)`: Starts running the server. `basePath` should point to the top level of your project.
+* `ostracodMultiplayer.initializeServer(basePath, gameDelegate, routerList)`: Starts running the server.
+    * `basePath` should point to the top level of your project.
+    * `gameDelegate` must be your custom implementation of `GameDelegate`.
+    * `routerList` is a list of Express routers for additional endpoints.
 * `ostracodMultiplayer.mode`: Either `"development"` or `"production"`.
 
 Members of `pageUtils`:
@@ -166,6 +169,7 @@ Members of `pageUtils`:
         * `shouldDisplayTitle`
         * `contentWidth`
 * `pageUtils.isAuthenticated(req)`: Returns whether the user is logged in based on the given request.
+* `pageUtils.getUsername(req)`: Returns the username of the logged-in user based on the given request.
 * `pageUtils.errorOutput`: Enumeration containing `JSON_ERROR_OUTPUT`, `PAGE_ERROR_OUTPUT`, and `SOCKET_ERROR_OUTPUT`.
 * `pageUtils.checkAuthentication(errorOutput)`: Prevents a user from accessing a page if they are not logged in.
 

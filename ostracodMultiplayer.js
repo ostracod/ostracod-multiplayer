@@ -13,6 +13,7 @@ var fs = require("fs");
 var expressWs = require("express-ws");
 
 function OstracodMultiplayer() {
+    this.expressApp = null;
     this.mode = null;
     this.basePath = null;
     this.configDirectory = null;
@@ -33,10 +34,10 @@ var dbUtils = require("./dbUtils").dbUtils;
 var pageUtils = require("./pageUtils").pageUtils;
 var gameUtils = require("./gameUtils").gameUtils;
 
-OstracodMultiplayer.prototype.initializeServer = function(basePath, gameDelegate) {
+OstracodMultiplayer.prototype.initializeServer = function(basePath, gameDelegate, routerList) {
     
-    this.app = express();
-    this.mode = this.app.get("env");
+    this.expressApp = express();
+    this.mode = this.expressApp.get("env");
     this.basePath = basePath;
     this.gameDelegate = gameDelegate;
     this.configDirectory = pathUtils.join(basePath, "ostracodMultiplayerConfig");
@@ -81,8 +82,8 @@ OstracodMultiplayer.prototype.initializeServer = function(basePath, gameDelegate
         console.log("SIMULATED LAG TURNED ON");
         console.log("AUTHENTICATION TURNED OFF");
         console.log("HTTPS TURNED OFF");
-        this.app.disable("view cache");
-        this.app.use(logger("dev"));
+        this.expressApp.disable("view cache");
+        this.expressApp.use(logger("dev"));
     } else if (this.mode == "production") {
         console.log("Application running in production mode.");
     } else {
@@ -93,29 +94,29 @@ OstracodMultiplayer.prototype.initializeServer = function(basePath, gameDelegate
     
     var server;
     if (this.mode == "development") {
-        server = http.createServer(this.app);
+        server = http.createServer(this.expressApp);
     } else {
         var privateKey  = fs.readFileSync(pathUtils.join(this.configDirectory, "ssl.key"), "utf8");
         var certificate = fs.readFileSync(pathUtils.join(this.configDirectory, "ssl.crt"), "utf8");
         var credentials = {key: privateKey, cert: certificate};
-        server = https.createServer(credentials, this.app);
+        server = https.createServer(credentials, this.expressApp);
     }
-    expressWs(this.app, server);
+    expressWs(this.expressApp, server);
     
-    this.app.set("views", this.localViewsDirectory);
-    this.app.engine("html", mustacheExpress());
+    this.expressApp.set("views", this.localViewsDirectory);
+    this.expressApp.engine("html", mustacheExpress());
     
     var faviconPath = pathUtils.join(this.configDirectory, "public", "favicon.ico");
     if (fs.existsSync(faviconPath)) {
-        this.app.use(favicon(faviconPath));
+        this.expressApp.use(favicon(faviconPath));
     }
-    this.app.use(bodyParser.json());
-    this.app.use(bodyParser.urlencoded({extended: false}));
-    this.app.use(cookieParser());
-    this.app.use(express.static(pathUtils.join(__dirname, "public")));
-    this.app.use(express.static(pathUtils.join(basePath, "public")));
-    this.app.set("trust proxy", 1);
-    this.app.use(session({
+    this.expressApp.use(bodyParser.json());
+    this.expressApp.use(bodyParser.urlencoded({extended: false}));
+    this.expressApp.use(cookieParser());
+    this.expressApp.use(express.static(pathUtils.join(__dirname, "public")));
+    this.expressApp.use(express.static(pathUtils.join(basePath, "public")));
+    this.expressApp.set("trust proxy", 1);
+    this.expressApp.use(session({
         secret: this.serverConfig.secret,
         resave: false,
         saveUninitialized: true,
@@ -123,17 +124,23 @@ OstracodMultiplayer.prototype.initializeServer = function(basePath, gameDelegate
     }))
     
     var router = require("./router");
-    this.app.use("/", router);
+    this.expressApp.use("/", router);
+    var index = 0;
+    while (index < routerList.length) {
+        var tempRouter = routerList[index];
+        this.expressApp.use("/", tempRouter);
+        index += 1;
+    }
     
     // Catch 404 and forward to error handler.
-    this.app.use(function(req, res, next) {
+    this.expressApp.use(function(req, res, next) {
         var tempError = new Error("Not Found");
         tempError.status = 404;
         next(tempError);
     });
     
     // Error handler.
-    this.app.use(function(error, req, res, next) {
+    this.expressApp.use(function(error, req, res, next) {
         var tempParameters = {message: error.message};
         if (this.mode == "development") {
             tempParameters.error = error;

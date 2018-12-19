@@ -145,7 +145,7 @@ router.get("/changePassword", checkAuthentication(PAGE_ERROR_OUTPUT), function(r
 });
 
 router.post("/changePasswordAction", checkAuthentication(JSON_ERROR_OUTPUT), function(req, res, next) {
-    var tempUsername = req.session.username;
+    var tempUsername = pageUtils.getUsername(req);
     var tempOldPassword = req.body.oldPassword;
     var tempNewPassword = req.body.newPassword;
     dbUtils.performTransaction(function(done) {
@@ -192,7 +192,7 @@ router.post("/changePasswordAction", checkAuthentication(JSON_ERROR_OUTPUT), fun
 });
 
 router.get("/menu", checkAuthentication(PAGE_ERROR_OUTPUT), function(req, res, next) {
-    var tempUsername = req.session.username;
+    var tempUsername = pageUtils.getUsername(req);
     var tempScore;
     function renderPage() {
         pageUtils.renderPage(
@@ -281,7 +281,7 @@ router.ws("/gameUpdate", checkAuthentication(SOCKET_ERROR_OUTPUT), function(ws, 
         }
     });
     function performUpdate(commandList) {
-        gameUtils.performUpdate(req.session.username, commandList, function(result) {
+        gameUtils.performUpdate(pageUtils.getUsername(req), commandList, function(result) {
             var tempRetryCount = 0;
             function tryToSendResponse() {
                 try {

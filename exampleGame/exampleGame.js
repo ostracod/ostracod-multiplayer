@@ -1,7 +1,12 @@
 
+var express = require("express");
 var tempResource = require("ostracod-multiplayer");
 var ostracodMultiplayer = tempResource.ostracodMultiplayer;
 var gameUtils = tempResource.gameUtils;
+var pageUtils = tempResource.pageUtils;
+
+var checkAuthentication = pageUtils.checkAuthentication;
+var PAGE_ERROR_OUTPUT = pageUtils.errorOutput.PAGE_ERROR_OUTPUT;
 
 function GameDelegate() {
     
@@ -43,9 +48,30 @@ gameUtils.addCommandListener(
     }
 );
 
+// Set up some extra server endpoints.
+var router = express.Router();
+
+router.get("/testOne", function(req, res, next) {
+    pageUtils.renderPage(
+        res,
+        pageUtils.getConsumerViewPath("test.html"),
+        {},
+        {message: "Anyone can view this page!"}
+    );
+});
+
+router.get("/testTwo", checkAuthentication(PAGE_ERROR_OUTPUT), function(req, res, next) {
+    pageUtils.renderPage(
+        res,
+        pageUtils.getConsumerViewPath("test.html"),
+        {},
+        {message: "Your username is " + pageUtils.getUsername(req) + "!"}
+    );
+});
+
 console.log("Starting OstracodMultiplayer...");
 
-var tempResult = ostracodMultiplayer.initializeServer(__dirname, gameDelegate);
+var tempResult = ostracodMultiplayer.initializeServer(__dirname, gameDelegate, [router]);
 
 if (!tempResult) {
     process.exit(1);
