@@ -3,6 +3,8 @@ var ostracodMultiplayer = require("./ostracodMultiplayer").ostracodMultiplayer;
 var dbUtils = require("./dbUtils").dbUtils;
 var accountUtils = require("./accountUtils").accountUtils;
 
+var accountDefaultFieldNameSet = ["uid", "username", "passwordHash", "emailAddress", "score"];
+
 function GameUtils() {
     this.framesPerSecond = 10;
     this.persistPeriod = 60; // Measured in seconds.
@@ -34,6 +36,13 @@ function Player(account) {
     this.accountUid = account.uid;
     this.username = account.username;
     this.score = account.score;
+    this.extraFields = {};
+    var name;
+    for (name in account) {
+        if (accountDefaultFieldNameSet.indexOf(name) < 0) {
+            this.extraFields[name] = account[name];
+        }
+    }
     this.lastActivityTime = Date.now() / 1000;
     this.lastChatMessageId = gameUtils.nextChatMessageId - 10;
     this.hasLeftGame = false;

@@ -1,8 +1,13 @@
 
 var localPlayerScore;
+var localPlayerInspiration;
 
 function displayLocalPlayerScore() {
     document.getElementById("score").innerHTML = localPlayerScore;
+}
+
+function displayLocalPlayerInspiration() {
+    document.getElementById("inspiration").innerHTML = localPlayerInspiration;
 }
 
 // Define how to communicate when the player earns points.
@@ -13,10 +18,23 @@ function addEarnPointsCommand() {
     });
 }
 
+// Define how to request inspiration.
+function addGetInspirationCommand() {
+    gameUpdateCommandList.push({
+        commandName: "getInspiration"
+    });
+}
+
 // Define how to process the "setScore" command.
 addCommandListener("setScore", function(command) {
     localPlayerScore = command.score;
     displayLocalPlayerScore();
+});
+
+// Define how to process the "setInspiration" command.
+addCommandListener("setInspiration", function(command) {
+    localPlayerInspiration = command.inspiration;
+    displayLocalPlayerInspiration();
 });
 
 function ClientDelegate() {
@@ -37,7 +55,7 @@ ClientDelegate.prototype.setLocalPlayerInfo = function(command) {
 // Called once before every socket communication.
 ClientDelegate.prototype.addCommandsBeforeUpdateRequest = function() {
     // This is a good place to add commands which must happen very often.
-    
+    addGetInspirationCommand();
 }
 
 // Called on every frame.

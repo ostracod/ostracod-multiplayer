@@ -24,6 +24,10 @@
                 {
                     "name": "score",
                     "type": "BIGINT"
+                },
+                {
+                    "name": "inspiration",
+                    "type": "BIGINT"
                 }
             ]
         }

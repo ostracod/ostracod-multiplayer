@@ -16,6 +16,9 @@ var gameDelegate = new GameDelegate();
 
 // Called whenever a player enters the game.
 GameDelegate.prototype.playerEnterEvent = function(player) {
+    if (player.extraFields.inspiration === null) {
+        player.extraFields.inspiration = 0;
+    }
     console.log(player.username + " entered!");
 }
 
@@ -38,6 +41,14 @@ function addSetScoreCommand(player, commandList) {
     });
 }
 
+// Define how to communicate the player's inspiration to the client.
+function addSetInspirationCommand(player, commandList) {
+    commandList.push({
+        commandName: "setInspiration",
+        inspiration: player.extraFields.inspiration
+    });
+}
+
 // Define how to process the "earnPoints" command.
 gameUtils.addCommandListener(
     "earnPoints", // Command name for the operation.
@@ -47,6 +58,30 @@ gameUtils.addCommandListener(
         addSetScoreCommand(player, commandList);
     }
 );
+
+// Define how to process the "getInspiration" command.
+gameUtils.addCommandListener(
+    "getInspiration", // Command name for the operation.
+    true, // Perform operation synchronously.
+    function(command, player, commandList) {
+        addSetInspirationCommand(player, commandList);
+    }
+);
+
+// Add a custom timer event.
+function timerEvent() {
+    if (gameUtils.isPersistingEverything) {
+        return;
+    }
+    var index = 0;
+    while (index < gameUtils.playerList.length) {
+        var tempPlayer = gameUtils.playerList[index];
+        tempPlayer.extraFields.inspiration += 1;
+        index += 1;
+    }
+}
+
+setInterval(timerEvent, 1000);
 
 // Set up some extra server endpoints.
 var router = express.Router();
