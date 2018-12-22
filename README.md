@@ -201,6 +201,7 @@ Members of `Player`:
 * `player.username`
 * `player.score`
 * `player.hasLeftGame`
+* `player.extraFields`: Dictionary of extra fields defined in your database schema. These will be persisted automatically.
 
 Your project must create a `GameDelegate` and pass it into `ostracodMultiplayer.initialize`. `GameDelegate` must have the following members:
 

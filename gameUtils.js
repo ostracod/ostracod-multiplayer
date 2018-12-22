@@ -64,10 +64,15 @@ Player.prototype.tick = function() {
 
 Player.prototype.persist = function(done) {
     var self = this;
+    var tempFieldSet = {score: self.score};
+    var name;
+    for (name in this.extraFields) {
+        tempFieldSet[name] = this.extraFields[name];
+    }
     dbUtils.performTransaction(function(callback) {
         accountUtils.updateAccount(
             self.accountUid,
-            {score: self.score}, 
+            tempFieldSet,
             function(error, result) {
                 if (error) {
                     console.log(error);
