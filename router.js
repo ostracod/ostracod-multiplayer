@@ -287,7 +287,6 @@ router.ws("/gameUpdate", checkAuthentication(SOCKET_ERROR_OUTPUT), function(ws, 
                 try {
                     ws.send(JSON.stringify(result));
                 } catch (error) {
-                    console.log(error);
                     if (tempRetryCount < 3) {
                         console.log("Trying to send response again.");
                         setTimeout(tryToSendResponse, 100);

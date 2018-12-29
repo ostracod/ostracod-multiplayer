@@ -222,7 +222,8 @@ function addSetLocalPlayerInfoCommand(player, commandList) {
     commandList.push({
         commandName: "setLocalPlayerInfo",
         username: player.username,
-        score: player.score
+        score: player.score,
+        extraFields: player.extraFields
     });
 }
 
