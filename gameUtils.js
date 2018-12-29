@@ -315,10 +315,14 @@ GameUtils.prototype.persistEverything = function(done) {
     }
     this.isPersistingEverything = true;
     var self = this;
-    var index = 0;
+    var index;
+    function persistAllPlayers() {
+        index = 0;
+        persistNextPlayer();
+    }
     function persistNextPlayer() {
         if (index >= self.playerList.length) {
-            self.gameDelegate.persistEvent(removeStalePlayers);
+            removeStalePlayers();
             return;
         }
         var tempPlayer = self.playerList[index];
@@ -340,7 +344,7 @@ GameUtils.prototype.persistEverything = function(done) {
         }
         done();
     }
-    persistNextPlayer();
+    self.gameDelegate.persistEvent(persistAllPlayers);
 }
 
 function exitEvent() {

@@ -207,7 +207,7 @@ Your project must create a `GameDelegate` and pass it into `ostracodMultiplayer.
 
 * `gameDelegate.playerEnterEvent(player)`: Called whenever a player enters the game.
 * `gameDelegate.playerLeaveEvent(player)`: Called whenever a player leaves the game.
-* `gameDelegate.persistEvent(done)`: Called when the server periodically persists game state. `GameDelegate` must always execute the `done` callback.
+* `gameDelegate.persistEvent(done)`: Called immediately before the server persists game state. `GameDelegate` must always execute the `done` callback.
 
 To run your project for development, perform this command:
 
