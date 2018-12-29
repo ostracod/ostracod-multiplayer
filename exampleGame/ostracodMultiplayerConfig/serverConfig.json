@@ -3,7 +3,8 @@
     "author": "Smith Smithberg",
     "port": 2628,
     "secret": "SUPER_SECRET",
-    "welcomeViewFile": "welcome.html"
+    "welcomeViewFile": "welcome.html",
+    "stylesheets": ["stylesheets/customGlobal.css"]
 }
 
 

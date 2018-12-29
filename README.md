@@ -54,9 +54,13 @@ Format of `serverConfig.json`:
     "author": String,
     "port": Number,
     "secret": String (For cookies),
-    "welcomeViewFile": String
+    "welcomeViewFile": String,
+    "stylesheets": [String]
 }
 ```
+
+* `welcomeViewFile` should be a file name inside your `views` directory.
+* `stylesheets` is a list of stylesheet paths to include in every page.
 
 Format of `gameConfig.json`:
 
@@ -81,7 +85,7 @@ Format of `gameConfig.json`:
 }
 ```
 
-* `welcomeViewFile` and `instructionsViewFile` should be file names inside your `views` directory.
+* `instructionsViewFile` should be a file name inside your `views` directory.
 * `scripts` is a list of script paths to include in the game client page.
 * `stylesheets` is a list of stylesheet paths to include in the game client page.
 * `canvasWidth` and `canvasHeight` are double-resolution for retina displays.

@@ -3,8 +3,6 @@ var fs = require("fs");
 var pathUtils = require("path");
 var Mustache = require("mustache");
 
-var ostracodMultiplayer = require("./ostracodMultiplayer").ostracodMultiplayer;
-
 function PageUtils() {
     
 }
@@ -28,6 +26,16 @@ PageUtils.prototype.renderPage = function(res, path, options, parameters) {
     var tempStylesheetList = getOption("stylesheets", []);
     var tempShouldDisplayTitle = getOption("shouldDisplayTitle", true);
     var tempContentWidth = getOption("contentWidth", 680);
+    if ("stylesheets" in ostracodMultiplayer.serverConfig) {
+        var tempDefaultStylesheetList = ostracodMultiplayer.serverConfig.stylesheets;
+        tempStylesheetList = tempStylesheetList.slice();
+        var index = 0;
+        while (index < tempDefaultStylesheetList.length) {
+            var tempStylesheet = tempDefaultStylesheetList[index];
+            tempStylesheetList.unshift(tempStylesheet);
+            index += 1;
+        }
+    }
     var tempTemplate = fs.readFileSync(path, "utf8");
     var tempContent = Mustache.render(tempTemplate, parameters);
     res.render("template.html", {
