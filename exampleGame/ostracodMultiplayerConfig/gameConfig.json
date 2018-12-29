@@ -13,6 +13,7 @@
     "stylesheets": [],
     "canvasWidth": 1000,
     "canvasHeight": 800,
+    "canvasBackgroundColor": "#FFCCCC",
     "framesPerSecond": 25,
     "maximumPlayerCount": 15
 }

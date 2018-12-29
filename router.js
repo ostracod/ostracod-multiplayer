@@ -247,6 +247,12 @@ router.get("/game", checkAuthentication(PAGE_ERROR_OUTPUT), function(req, res, n
         tempScriptList.push(tempPath);
         index += 1;
     }
+    var tempCanvasBackgroundColor;
+    if ("canvasBackgroundColor" in ostracodMultiplayer.gameConfig) {
+        tempCanvasBackgroundColor = ostracodMultiplayer.gameConfig.canvasBackgroundColor;
+    } else {
+        tempCanvasBackgroundColor = "#FFFFFF";
+    }
     pageUtils.renderPage(
         res,
         pageUtils.getLocalViewPath("game.html"),
@@ -260,6 +266,7 @@ router.get("/game", checkAuthentication(PAGE_ERROR_OUTPUT), function(req, res, n
             modules: tempModuleList,
             canvasWidth: ostracodMultiplayer.gameConfig.canvasWidth,
             canvasHeight: ostracodMultiplayer.gameConfig.canvasHeight,
+            canvasBackgroundColor: tempCanvasBackgroundColor,
             framesPerSecond: ostracodMultiplayer.gameConfig.framesPerSecond,
             gameName: ostracodMultiplayer.serverConfig.gameName.toUpperCase(),
             instructions: fs.readFileSync(tempInstructionsPath, "utf8"),

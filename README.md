@@ -80,6 +80,7 @@ Format of `gameConfig.json`:
     "stylesheets": [String],
     "canvasWidth": Number,
     "canvasHeight": Number,
+    "canvasBackgroundColor": String,
     "framesPerSecond": Number,
     "maximumPlayerCount": Number
 }
@@ -235,6 +236,7 @@ The global scope in the game page exposes the following members:
 * `Color`: Represents an RGB color.
 * `canvas` and `context`: For rendering graphics.
 * `canvasWidth` and `canvasHeight`: Canvas dimensions as defined in your config file.
+* `canvasBackgroundColor`: Color string as defined in your config file.
 * `framesPerSecond`: FPS as defined in your config file.
 * `shiftKeyIsHeld`: Whether the user is pressing the shift key.
 * `gameUpdateCommandList`: List of commands to send to the server.
@@ -242,7 +244,7 @@ The global scope in the game page exposes the following members:
 * `clientDelegate`: You must assign a value to this in your script.
 * `addCommandListener(commandName, operation)`: Perform an operation whenever the client receives a server command. `operation` accepts a single `(command)` argument.
 * `addCommandRepeater(commandName, operation)`: Invoked for any unsent commands after receiving server commands. `operation` accepts a single `(command)` argument.
-* `clearCanvas()`: Erases contents of the canvas.
+* `clearCanvas()`: Erases contents of the canvas using `canvasBackgroundColor`.
 
 Members of `Pos`:
 

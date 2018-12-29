@@ -3,6 +3,7 @@ var canvas;
 var context;
 var canvasWidth;
 var canvasHeight;
+var canvasBackgroundColor;
 var framesPerSecond;
 var shiftKeyIsHeld = false;
 var chatInput;
@@ -276,7 +277,7 @@ function hideModuleByName(name) {
 }
 
 function clearCanvas() {
-    context.fillStyle = "#FFFFFF";
+    context.fillStyle = canvasBackgroundColor;
     context.fillRect(0, 0, canvasWidth, canvasHeight);
 }
 
