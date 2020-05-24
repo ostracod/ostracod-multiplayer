@@ -114,6 +114,7 @@ Format of `schemaConfig.json`:
                     "name": String,
                     "type": String,
                     "primaryKey": Boolean (Optional),
+                    "indexed": Boolean (Optional),
                     "autoIncrement": Boolean (Optional)
                 }
             ]

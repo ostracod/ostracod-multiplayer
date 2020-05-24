@@ -84,6 +84,7 @@ function compareTableFieldAttributes(table, field, fieldAttributes) {
     var outputMessageList = [];
     var tempDescription = "Field \"" + field.name + "\" of table \"" + table.name + "\"";
     var tempAttributesAreCorrect = true;
+    
     var tempType = fieldAttributes.COLUMN_TYPE.toLowerCase();
     if (tempType.match(/^int\([0-9]+\)$/)) {
         tempType = "int";
@@ -94,17 +95,21 @@ function compareTableFieldAttributes(table, field, fieldAttributes) {
         outputMessageList.push(tempDescription + " has the wrong data type \"" + fieldAttributes.COLUMN_TYPE + "\". It should be \"" + field.type + "\".");
         tempAttributesAreCorrect = false;
     }
-    var tempIsPrimaryKey = (fieldAttributes.COLUMN_KEY.toUpperCase() == "PRI")
-    var tempShouldBePrimaryKey;
-    if ("primaryKey" in field) {
-        tempShouldBePrimaryKey = field.primaryKey;
+    
+    let tempColumnKey = fieldAttributes.COLUMN_KEY.toUpperCase();
+    var tempExpectedColumnKey;
+    if ("primaryKey" in field && field.primaryKey) {
+        tempExpectedColumnKey = "PRI"
+    } else if ("indexed" in field && field.indexed) {
+        tempExpectedColumnKey = "MUL";
     } else {
-        tempShouldBePrimaryKey = false;
+        tempExpectedColumnKey = "";
     }
-    if (tempIsPrimaryKey != tempShouldBePrimaryKey) {
+    if (tempColumnKey != tempExpectedColumnKey) {
         outputMessageList.push(tempDescription + " has the wrong COLUMN_KEY value.");
         tempAttributesAreCorrect = false;
     }
+    
     var tempIsAutoIncrement = (fieldAttributes.EXTRA.toLowerCase() == "auto_increment")
     var tempShouldBeAutoIncrement;
     if ("autoIncrement" in field) {
@@ -116,6 +121,7 @@ function compareTableFieldAttributes(table, field, fieldAttributes) {
         outputMessageList.push(tempDescription + " has the wrong EXTRA value.");
         tempAttributesAreCorrect = false;
     }
+    
     if (tempAttributesAreCorrect) {
         outputMessageList = [tempDescription + " exists and has the correct attributes."];
     }
@@ -152,21 +158,20 @@ function getFieldDefinition(field) {
 
 function createTable(table, done) {
     var fieldDefinitionList = [];
-    var primaryKeyField = null;
     var index = 0;
     while (index < table.fields.length) {
         var tempField = table.fields[index];
         var tempDefinition = getFieldDefinition(tempField);
         fieldDefinitionList.push(tempDefinition);
-        if ("primaryKey" in tempField) {
-            if (tempField.primaryKey) {
-                primaryKeyField = tempField;
-            }
-        }
         index += 1;
     }
-    if (primaryKeyField !== null) {
-        fieldDefinitionList.push("PRIMARY KEY (" + primaryKeyField.name + ")");
+    for (let field of table.fields) {
+        if ("primaryKey" in field && field.primaryKey) {
+            fieldDefinitionList.push(`PRIMARY KEY (${field.name})`);
+        }
+        if ("indexed" in field && field.indexed) {
+            fieldDefinitionList.push(`INDEX (${field.name})`);
+        }
     }
     connection.query(
         "CREATE TABLE " + databaseName + "." + table.name + " (" + fieldDefinitionList.join(", ") + ")",
@@ -184,8 +189,12 @@ function createTable(table, done) {
 
 function addTableField(table, field, done) {
     var tempDefinition = getFieldDefinition(field);
+    let tempStatement = `ALTER TABLE ${databaseName}.${table.name} ADD COLUMN ${tempDefinition}`;
+    if ("indexed" in field && field.indexed) {
+        tempStatement += `, ADD INDEX (${field.name})`;
+    }
     connection.query(
-        "ALTER TABLE " + databaseName + "." + table.name + " ADD COLUMN " + tempDefinition,
+        tempStatement,
         [],
         function (error, results, fields) {
             if (error) {
