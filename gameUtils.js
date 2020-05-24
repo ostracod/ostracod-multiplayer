@@ -17,6 +17,8 @@ function GameUtils() {
     this.playerList = [];
     this.commandListenerMap = {};
     this.gameDelegate = null;
+    this.isPerformingAtomicOperation = false;
+    this.atomicOperationQueue = [];
 }
 
 var gameUtils = new GameUtils();
@@ -89,6 +91,34 @@ function CommandListener(isSynchronous, operation) {
     this.operation = operation;
 }
 
+GameUtils.prototype.performNextAtomicOperation = function() {
+    if (this.atomicOperationQueue.length <= 0) {
+        this.isPerformingAtomicOperation = false;
+        return;
+    }
+    let tempOperation = this.atomicOperationQueue.shift();
+    tempOperation(() => {
+        this.performNextAtomicOperation();
+    });
+}
+
+GameUtils.prototype.performAtomicOperation = function(operation, done) {
+    queueOperation = callback => {
+        operation(error => {
+            callback();
+            if (typeof error === "undefined") {
+                error = null;
+            }
+            done(error);
+        });
+    };
+    this.atomicOperationQueue.push(queueOperation);
+    if (!this.isPerformingAtomicOperation) {
+        this.isPerformingAtomicOperation = true;
+        this.performNextAtomicOperation();
+    }
+}
+
 GameUtils.prototype.addChatMessage = function(username, text) {
     var tempId = this.nextChatMessageId;
     this.nextChatMessageId += 1;
@@ -145,41 +175,49 @@ GameUtils.prototype.performUpdate = function(username, commandList, done) {
     }
     var self = this;
     function processNextCommand() {
-        if (self.isPersistingEverything) {
-            setTimeout(processNextCommand, 100);
+        if (index >= commandList.length) {
+            done({
+                success: true,
+                commandList: tempCommandList
+            });
             return;
         }
-        while (true) {
-            if (index >= commandList.length) {
-                done({
-                    success: true,
-                    commandList: tempCommandList
-                });
-                return;
-            }
-            var tempCommand = commandList[index];
-            index += 1;
-            var tempCommandListener = self.commandListenerMap[tempCommand.commandName];
-            if (typeof tempCommandListener === "undefined") {
-                console.log("ERROR: Unknown listener command \"" + tempCommand.commandName + "\".");
-            } else {
-                if (tempCommandListener.isSynchronous) {
-                    tempCommandListener.operation(
-                        tempCommand,
-                        tempPlayer,
-                        tempCommandList
-                    );
-                } else {
-                    tempCommandListener.operation(
-                        tempCommand,
-                        tempPlayer,
-                        tempCommandList,
-                        processNextCommand,
-                        errorHandler
-                    );
-                }
-            }
+        var tempCommand = commandList[index];
+        index += 1;
+        var tempCommandListener = self.commandListenerMap[tempCommand.commandName];
+        if (typeof tempCommandListener === "undefined") {
+            console.log("ERROR: Unknown listener command \"" + tempCommand.commandName + "\".");
+            processNextCommand();
+            return;
         }
+        let tempOperation;
+        if (tempCommandListener.isSynchronous) {
+            tempOperation = callback => {
+                tempCommandListener.operation(
+                    tempCommand,
+                    tempPlayer,
+                    tempCommandList
+                );
+                setTimeout(callback, 0);
+            };
+        } else {
+            tempOperation = callback => {
+                tempCommandListener.operation(
+                    tempCommand,
+                    tempPlayer,
+                    tempCommandList,
+                    callback,
+                    callback
+                );
+            };
+        }
+        self.performAtomicOperation(tempOperation, error => {
+            if (error === null) {
+                processNextCommand();
+            } else {
+                errorHandler(error);
+            }
+        });
     }
     var tempErrorMessage = null;
     tempPlayer = self.getPlayerByUsername(username, true);
@@ -306,11 +344,7 @@ gameUtils.addCommandListener(
     }
 );
 
-GameUtils.prototype.persistEverything = function(done) {
-    if (this.isPersistingEverything) {
-        done();
-        return;
-    }
+GameUtils.prototype.persistEverythingHelper = function(done) {
     if (ostracodMultiplayer.mode == "development") {
         console.log("Saving world state...");
     }
@@ -346,6 +380,12 @@ GameUtils.prototype.persistEverything = function(done) {
         done();
     }
     self.gameDelegate.persistEvent(persistAllPlayers);
+}
+
+GameUtils.prototype.persistEverything = function(done) {
+    this.performAtomicOperation(callback => {
+        this.persistEverythingHelper(callback);
+    }, done);
 }
 
 function exitEvent() {

@@ -25,6 +25,13 @@ function addGetInspirationCommand() {
     });
 }
 
+// Define how to perform an asynchronous operation.
+function addAsynchronousOperationCommand() {
+    gameUpdateCommandList.push({
+        commandName: "asynchronousOperation"
+    });
+}
+
 // Define how to process the "setScore" command.
 addCommandListener("setScore", function(command) {
     localPlayerScore = command.score;
@@ -55,6 +62,7 @@ ClientDelegate.prototype.setLocalPlayerInfo = function(command) {
 // Called once before every socket communication.
 ClientDelegate.prototype.addCommandsBeforeUpdateRequest = function() {
     // This is a good place to add commands which must happen very often.
+    addAsynchronousOperationCommand();
     addGetInspirationCommand();
 }
 

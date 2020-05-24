@@ -77,7 +77,7 @@ DbUtils.prototype.startTransaction = function(done) {
         });
         connection.connect(function(error) {
             if (error) {
-                console.log(accountUtils.convertSqlErrorToText(error));
+                console.log(dbUtils.convertSqlErrorToText(error));
                 return;
             }
             done();

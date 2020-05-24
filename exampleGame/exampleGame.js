@@ -68,6 +68,15 @@ gameUtils.addCommandListener(
     }
 );
 
+// Define how to process the "asynchronousOperation" command.
+gameUtils.addCommandListener(
+    "asynchronousOperation", // Command name for the operation.
+    false, // Perform operation asynchronously.
+    function(command, player, commandList, done, errorHandler) {
+        setTimeout(done, 100);
+    }
+);
+
 // Add a custom timer event.
 function timerEvent() {
     if (gameUtils.isPersistingEverything) {

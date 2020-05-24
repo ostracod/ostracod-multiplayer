@@ -279,7 +279,7 @@ router.ws("/gameUpdate", checkAuthentication(SOCKET_ERROR_OUTPUT), function(ws, 
     console.log("Opening socket.");
     ws.on("message", function(message) {
         var tempCommandList = JSON.parse(message);
-        if (ostracodMultiplayer.mode) {
+        if (ostracodMultiplayer.mode === "development") {
             setTimeout(function() {
                 performUpdate(tempCommandList);
             }, 50 + Math.floor(Math.random() * 150));
