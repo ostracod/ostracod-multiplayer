@@ -38,13 +38,14 @@ The directory `ostracodMultiplayerConfig` should contain these files:
 
 * `ostracodMultiplayerConfig/ssl.crt`
 * `ostracodMultiplayerConfig/ssl.key`
+* `ostracodMultiplayerConfig/ssl.ca-bundle` (Optional)
 * `ostracodMultiplayerConfig/serverConfig.json`
 * `ostracodMultiplayerConfig/gameConfig.json`
 * `ostracodMultiplayerConfig/databaseConfig.json`
 * `ostracodMultiplayerConfig/schemaConfig.json`
 * `ostracodMultiplayerConfig/favicon.ico` (Optional)
 
-`ssl.crt` and `ssl.key` are the files required to enable https.
+`ssl.crt` and `ssl.key` are the files required to enable https. `ssl.ca-bundle` may also be necessary depending on your certificate provider.
 
 Format of `serverConfig.json`:
 

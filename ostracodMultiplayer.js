@@ -99,6 +99,10 @@ OstracodMultiplayer.prototype.initializeServer = function(basePath, gameDelegate
         var privateKey  = fs.readFileSync(pathUtils.join(this.configDirectory, "ssl.key"), "utf8");
         var certificate = fs.readFileSync(pathUtils.join(this.configDirectory, "ssl.crt"), "utf8");
         var credentials = {key: privateKey, cert: certificate};
+        var tempPath = pathUtils.join(this.configDirectory, "ssl.ca-bundle");
+        if (fs.existsSync(tempPath)) {
+            credentials.ca = fs.readFileSync(tempPath);
+        }
         server = https.createServer(credentials, this.expressApp);
     }
     expressWs(this.expressApp, server);
