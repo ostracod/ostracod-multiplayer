@@ -3,7 +3,7 @@
   "version": "1.2.0",
   "main": "index.js",
   "dependencies": {
-    "bcrypt": "^3.0.8",
+    "bcrypt": "^5.0.0",
     "body-parser": "^1.18.3",
     "confirm-cli": "^0.4.0",
     "cookie-parser": "~1.4.3",
