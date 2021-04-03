@@ -1,19 +1,19 @@
 
-var parseArgs = require("minimist");
-var fs = require("fs");
-var pathUtils = require("path");
-var mysql = require("mysql");
-var confirm = require("confirm-cli");
+const parseArgs = require("minimist");
+const fs = require("fs");
+const pathUtils = require("path");
+const mysql = require("mysql");
+const confirm = require("confirm-cli");
 
-var connection = null;
+let connection = null;
 
-function reportSqlError(error) {
+const reportSqlError = (error) => {
     console.log("Could not connect to MySQL.");
     console.log(error.code);
     console.log(error.sqlMessage);
 }
 
-function exitCleanly(exitValue) {
+const exitCleanly = (exitValue) => {
     if (typeof exitValue === "undefined") {
         exitValue = 0;
     }
@@ -23,7 +23,7 @@ function exitCleanly(exitValue) {
     process.exit(exitValue);
 }
 
-function printUsageAndExit() {
+const printUsageAndExit = () => {
     console.log("Usage:");
     console.log("node schemaTool.js setUp");
     console.log("node schemaTool.js verify");
@@ -31,41 +31,41 @@ function printUsageAndExit() {
     exitCleanly(1);
 }
 
-function databaseExists(done) {
+const databaseExists = (done) => {
     connection.query(
         "SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = ?",
         [databaseName],
-        function (error, results, fields) {
+        (error, results, fields) => {
             if (error) {
                 reportSqlError(error);
                 exitCleanly();
                 return;
             }
             done(results.length > 0);
-        }
+        },
     );
 }
 
-function tableExists(table, done) {
+const tableExists = (table, done) => {
     connection.query(
         "SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ?",
         [databaseName, table.name],
-        function (error, results, fields) {
+        (error, results, fields) => {
             if (error) {
                 reportSqlError(error);
                 exitCleanly();
                 return;
             }
             done(results.length > 0);
-        }
+        },
     );
 }
 
-function getTableFieldAttributes(table, field, done) {
+const getTableFieldAttributes = (table, field, done) => {
     connection.query(
         "SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ? AND COLUMN_NAME = ?",
         [databaseName, table.name, field.name],
-        function (error, results, fields) {
+        (error, results, fields) => {
             if (error) {
                 reportSqlError(error);
                 exitCleanly();
@@ -76,28 +76,28 @@ function getTableFieldAttributes(table, field, done) {
             } else {
                 done(null);
             }
-        }
+        },
     );
 }
 
-function compareTableFieldAttributes(table, field, fieldAttributes) {
-    var outputMessageList = [];
-    var tempDescription = "Field \"" + field.name + "\" of table \"" + table.name + "\"";
-    var tempAttributesAreCorrect = true;
+const compareTableFieldAttributes = (table, field, fieldAttributes) => {
+    let outputMessageList = [];
+    const tempDescription = "Field \"" + field.name + "\" of table \"" + table.name + "\"";
+    let tempAttributesAreCorrect = true;
     
-    var tempType = fieldAttributes.COLUMN_TYPE.toLowerCase();
+    let tempType = fieldAttributes.COLUMN_TYPE.toLowerCase();
     if (tempType.match(/^int\([0-9]+\)$/)) {
         tempType = "int";
     } else if (tempType.match(/^bigint\([0-9]+\)$/)) {
         tempType = "bigint";
     }
-    if (tempType != field.type.toLowerCase()) {
+    if (tempType !== field.type.toLowerCase()) {
         outputMessageList.push(tempDescription + " has the wrong data type \"" + fieldAttributes.COLUMN_TYPE + "\". It should be \"" + field.type + "\".");
         tempAttributesAreCorrect = false;
     }
     
     let tempColumnKey = fieldAttributes.COLUMN_KEY.toUpperCase();
-    var tempExpectedColumnKey;
+    let tempExpectedColumnKey;
     if ("primaryKey" in field && field.primaryKey) {
         tempExpectedColumnKey = "PRI"
     } else if ("indexed" in field && field.indexed) {
@@ -105,19 +105,19 @@ function compareTableFieldAttributes(table, field, fieldAttributes) {
     } else {
         tempExpectedColumnKey = "";
     }
-    if (tempColumnKey != tempExpectedColumnKey) {
+    if (tempColumnKey !== tempExpectedColumnKey) {
         outputMessageList.push(tempDescription + " has the wrong COLUMN_KEY value.");
         tempAttributesAreCorrect = false;
     }
     
-    var tempIsAutoIncrement = (fieldAttributes.EXTRA.toLowerCase() == "auto_increment")
-    var tempShouldBeAutoIncrement;
+    const tempIsAutoIncrement = (fieldAttributes.EXTRA.toLowerCase() === "auto_increment")
+    let tempShouldBeAutoIncrement;
     if ("autoIncrement" in field) {
         tempShouldBeAutoIncrement = field.autoIncrement;
     } else {
         tempShouldBeAutoIncrement = false;
     }
-    if (tempIsAutoIncrement != tempShouldBeAutoIncrement) {
+    if (tempIsAutoIncrement !== tempShouldBeAutoIncrement) {
         outputMessageList.push(tempDescription + " has the wrong EXTRA value.");
         tempAttributesAreCorrect = false;
     }
@@ -127,27 +127,27 @@ function compareTableFieldAttributes(table, field, fieldAttributes) {
     }
     return {
         isCorrect: tempAttributesAreCorrect,
-        message: outputMessageList.join("\n")
+        message: outputMessageList.join("\n"),
     };
 }
 
-function createDatabase(done) {
+const createDatabase = (done) => {
     connection.query(
         "CREATE DATABASE " + databaseName,
         [],
-        function (error, results, fields) {
+        (error, results, fields) => {
             if (error) {
                 reportSqlError(error);
                 exitCleanly();
                 return;
             }
             done();
-        }
+        },
     );
 }
 
-function getFieldDefinition(field) {
-    var output = field.name + " " + field.type;
+const getFieldDefinition = (field) => {
+    let output = field.name + " " + field.type;
     if ("autoIncrement" in field) {
         if (field.autoIncrement) {
             output += " AUTO_INCREMENT";
@@ -156,16 +156,13 @@ function getFieldDefinition(field) {
     return output;
 }
 
-function createTable(table, done) {
-    var fieldDefinitionList = [];
-    var index = 0;
-    while (index < table.fields.length) {
-        var tempField = table.fields[index];
-        var tempDefinition = getFieldDefinition(tempField);
+const createTable = (table, done) => {
+    const fieldDefinitionList = [];
+    for (const field of table.fields) {
+        const tempDefinition = getFieldDefinition(field);
         fieldDefinitionList.push(tempDefinition);
-        index += 1;
     }
-    for (let field of table.fields) {
+    for (const field of table.fields) {
         if ("primaryKey" in field && field.primaryKey) {
             fieldDefinitionList.push(`PRIMARY KEY (${field.name})`);
         }
@@ -176,19 +173,19 @@ function createTable(table, done) {
     connection.query(
         "CREATE TABLE " + databaseName + "." + table.name + " (" + fieldDefinitionList.join(", ") + ")",
         [],
-        function (error, results, fields) {
+        (error, results, fields) => {
             if (error) {
                 reportSqlError(error);
                 exitCleanly();
                 return;
             }
             done();
-        }
+        },
     );
 }
 
-function addTableField(table, field, done) {
-    var tempDefinition = getFieldDefinition(field);
+const addTableField = (table, field, done) => {
+    const tempDefinition = getFieldDefinition(field);
     let tempStatement = `ALTER TABLE ${databaseName}.${table.name} ADD COLUMN ${tempDefinition}`;
     if ("indexed" in field && field.indexed) {
         tempStatement += `, ADD INDEX (${field.name})`;
@@ -196,36 +193,36 @@ function addTableField(table, field, done) {
     connection.query(
         tempStatement,
         [],
-        function (error, results, fields) {
+        (error, results, fields) => {
             if (error) {
                 reportSqlError(error);
                 exitCleanly();
                 return;
             }
             done();
-        }
+        },
     );
 }
 
-function deleteDatabase(done) {
+const deleteDatabase = (done) => {
     connection.query(
         "DROP DATABASE " + databaseName,
         [],
-        function (error, results, fields) {
+        (error, results, fields) => {
             if (error) {
                 reportSqlError(error);
                 exitCleanly();
                 return;
             }
             done();
-        }
+        },
     );
 }
 
-function setUpTableField(table, field, done) {
-    getTableFieldAttributes(table, field, function(fieldAttributes) {
+const setUpTableField = (table, field, done) => {
+    getTableFieldAttributes(table, field, (fieldAttributes) => {
         if (fieldAttributes !== null) {
-            var tempResult = compareTableFieldAttributes(table, field, fieldAttributes);
+            const tempResult = compareTableFieldAttributes(table, field, fieldAttributes);
             console.log(tempResult.message);
             if (!tempResult.isCorrect) {
                 console.log("Aborting.");
@@ -235,108 +232,108 @@ function setUpTableField(table, field, done) {
             return;
         }
         console.log("Adding field \"" + field.name + "\" to table \"" + table.name + "\"...");
-        addTableField(table, field, function() {
+        addTableField(table, field, () => {
             console.log("Added field \"" + field.name + "\" to table \"" + table.name + "\".");
             done();
         });
     });
 }
 
-function setUpTableFields(table, done) {
-    var index = 0;
-    function setUpNextTableField() {
+const setUpTableFields = (table, done) => {
+    let index = 0;
+    const setUpNextTableField = () => {
         if (index >= table.fields.length) {
             done();
             return;
         }
-        var tempField = table.fields[index];
+        const tempField = table.fields[index];
         index += 1;
         setUpTableField(table, tempField, setUpNextTableField);
-    }
+    };
     setUpNextTableField();
 }
 
-function setUpTable(table, done) {
-    tableExists(table, function(exists) {
+const setUpTable = (table, done) => {
+    tableExists(table, (exists) => {
         if (exists) {
             console.log("Table \"" + table.name + "\" already exists.");
             setUpTableFields(table, done);
             return;
         }
         console.log("Creating table \"" + table.name + "\"...");
-        createTable(table, function() {
+        createTable(table, () => {
             console.log("Created table \"" + table.name + "\".");
             done();
         });
     });
 }
 
-function setUpTables(done) {
-    var index = 0;
-    function setUpNextTable() {
+const setUpTables = (done) => {
+    let index = 0;
+    const setUpNextTable = () => {
         if (index >= schemaConfig.tables.length) {
             done();
             return;
         }
-        var tempTable = schemaConfig.tables[index];
+        const tempTable = schemaConfig.tables[index];
         index += 1;
         setUpTable(tempTable, setUpNextTable);
-    }
+    };
     setUpNextTable();
 }
 
-function setUpDatabase(done) {
-    databaseExists(function(exists) {
+const setUpDatabase = (done) => {
+    databaseExists((exists) => {
         if (exists) {
             console.log("Database \"" + databaseName + "\" already exists.");
             setUpTables(done);
             return;
         }
         console.log("Creating database \"" + databaseName + "\"...");
-        createDatabase(function() {
+        createDatabase(() => {
             console.log("Created database \"" + databaseName + "\".");
             setUpTables(done);
         });
     });
 }
 
-function setUpSchemaCommand() {
+const setUpSchemaCommand = () => {
     console.log("Setting up database...");
-    setUpDatabase(function() {
+    setUpDatabase(() => {
         console.log("Finished setting up database \"" + databaseName + "\".");
         exitCleanly();
     });
 }
 
-function verifyTableField(table, field, done) {
-    getTableFieldAttributes(table, field, function(fieldAttributes) {
+const verifyTableField = (table, field, done) => {
+    getTableFieldAttributes(table, field, (fieldAttributes) => {
         if (fieldAttributes === null) {
             console.log("Field \"" + field.name + "\" of table \"" + table.name + "\" is missing.");
             done();
             return;
         }
-        var tempResult = compareTableFieldAttributes(table, field, fieldAttributes);
+        const tempResult = compareTableFieldAttributes(table, field, fieldAttributes);
         console.log(tempResult.message);
         done();
     });
 }
 
-function verifyTableFields(table, done) {
-    var index = 0;
-    function verifyNextTableField() {
+const verifyTableFields = (table, done) => {
+    let index = 0;
+    const verifyNextTableField = () => {
         if (index >= table.fields.length) {
             done();
             return;
         }
-        var tempField = table.fields[index];
+        const tempField = table.fields[index];
         index += 1;
         verifyTableField(table, tempField, verifyNextTableField);
-    }
+    };
     verifyNextTableField();
 }
 
-function verifyTable(table, done) {
-    tableExists(table, function(exists) {
+const verifyTable = (table, done) => {
+    tableExists(table, (exists) => {
         if (!exists) {
             console.log("Table \"" + table.name + "\" is missing.");
             done();
@@ -347,22 +344,22 @@ function verifyTable(table, done) {
     });
 }
 
-function verifyTables(done) {
-    var index = 0;
-    function verifyNextTable() {
+const verifyTables = (done) => {
+    let index = 0;
+    const verifyNextTable = () => {
         if (index >= schemaConfig.tables.length) {
             done();
             return;
         }
-        var tempTable = schemaConfig.tables[index];
+        const tempTable = schemaConfig.tables[index];
         index += 1;
         verifyTable(tempTable, verifyNextTable);
-    }
+    };
     verifyNextTable();
 }
 
-function verifyDatabase(done) {
-    databaseExists(function(exists) {
+const verifyDatabase = (done) => {
+    databaseExists((exists) => {
         if (!exists) {
             console.log("Database \"" + databaseName + "\" is missing.");
             done();
@@ -373,59 +370,59 @@ function verifyDatabase(done) {
     });
 }
 
-function verifySchemaCommand() {
+const verifySchemaCommand = () => {
     console.log("Verifying database...");
-    verifyDatabase(function() {
+    verifyDatabase(() => {
         console.log("Finished verifying database.");
         exitCleanly();
     });
 }
 
-function destroyDatabase() {
+const destroyDatabase = () => {
     console.log("Destroying database...");
-    databaseExists(function(exists) {
+    databaseExists((exists) => {
         if (!exists) {
             console.log("Database is already missing.");
             exitCleanly();
             return;
         }
-        deleteDatabase(function() {
+        deleteDatabase(() => {
             console.log("Destroyed database.");
             exitCleanly();
         });
     });
 }
 
-function destroySchemaCommand() {
+const destroySchemaCommand = () => {
     confirm(
         "Are you sure you want to destroy the database \"" + databaseName + "\"?",
-        function () {
+        () => {
             destroyDatabase();
         },
-        function () {
+        () => {
             console.log("Database NOT destroyed.");
             exitCleanly();
         },
-        {text: ["Destroy", "Cancel"]}
+        { text: ["Destroy", "Cancel"] },
     );
 }
 
-function processCli() {
+const processCli = () => {
     
-    var command = args["_"][0].toLowerCase();
+    const command = args["_"][0].toLowerCase();
     
-    if (command == "setup") {
+    if (command === "setup") {
         setUpSchemaCommand();
-    } else if (command == "destroy") {
+    } else if (command === "destroy") {
         destroySchemaCommand();
-    } else if (command == "verify") {
+    } else if (command === "verify") {
         verifySchemaCommand();
     } else {
         printUsageAndExit();
     }
 }
 
-var baseDirectory = "./ostracodMultiplayerConfig";
+const baseDirectory = "./ostracodMultiplayerConfig";
 
 if (!fs.existsSync(baseDirectory)) {
     console.log("Could not find " + baseDirectory + ".");
@@ -433,14 +430,14 @@ if (!fs.existsSync(baseDirectory)) {
     exitCleanly(1);
 }
 
-var databaseConfigPath = pathUtils.join(baseDirectory, "databaseConfig.json");
-var schemaConfigPath = pathUtils.join(baseDirectory, "schemaConfig.json");
+const databaseConfigPath = pathUtils.join(baseDirectory, "databaseConfig.json");
+const schemaConfigPath = pathUtils.join(baseDirectory, "schemaConfig.json");
 
-var databaseConfig = JSON.parse(fs.readFileSync(databaseConfigPath, "utf8"));
-var schemaConfig = JSON.parse(fs.readFileSync(schemaConfigPath, "utf8"));
-var databaseName = databaseConfig.databaseName
+const databaseConfig = JSON.parse(fs.readFileSync(databaseConfigPath, "utf8"));
+const schemaConfig = JSON.parse(fs.readFileSync(schemaConfigPath, "utf8"));
+const databaseName = databaseConfig.databaseName
 
-var args = parseArgs(process.argv.slice(2));
+const args = parseArgs(process.argv.slice(2));
 
 if (args["_"].length <= 0) {
     printUsageAndExit();
@@ -451,10 +448,10 @@ console.log("Connecting to MySQL...");
 connection = mysql.createConnection({
     host: databaseConfig.host,
     user: databaseConfig.username,
-    password: databaseConfig.password
+    password: databaseConfig.password,
 });
 
-connection.connect(function(error) {
+connection.connect((error) => {
     if (error) {
         reportSqlError(error);
         exitCleanly();

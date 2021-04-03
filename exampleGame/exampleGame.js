@@ -1,121 +1,114 @@
 
-var express = require("express");
-var tempResource = require("ostracod-multiplayer");
-var ostracodMultiplayer = tempResource.ostracodMultiplayer;
-var gameUtils = tempResource.gameUtils;
-var pageUtils = tempResource.pageUtils;
+const express = require("express");
+const { ostracodMultiplayer, gameUtils, pageUtils } = require("ostracod-multiplayer");
 
-var checkAuthentication = pageUtils.checkAuthentication;
-var PAGE_ERROR_OUTPUT = pageUtils.errorOutput.PAGE_ERROR_OUTPUT;
+const { checkAuthentication } = pageUtils;
+const { PAGE_ERROR_OUTPUT } = pageUtils.errorOutput;
 
-function GameDelegate() {
+class GameDelegate {
     
-}
-
-var gameDelegate = new GameDelegate();
-
-// Called whenever a player enters the game.
-GameDelegate.prototype.playerEnterEvent = function(player) {
-    if (player.extraFields.inspiration === null) {
-        player.extraFields.inspiration = 0;
+    // Called whenever a player enters the game.
+    playerEnterEvent(player) {
+        if (player.extraFields.inspiration === null) {
+            player.extraFields.inspiration = 0;
+        }
+        console.log(player.username + " entered!");
     }
-    console.log(player.username + " entered!");
+    
+    // Called whenever a player leaves the game.
+    playerLeaveEvent(player) {
+        console.log(player.username + " left!");
+    }
+    
+    // Called whenever the server is persisting server state.
+    persistEvent(done) {
+        console.log("Persist event!");
+        done();
+    }
 }
 
-// Called whenever a player leaves the game.
-GameDelegate.prototype.playerLeaveEvent = function(player) {
-    console.log(player.username + " left!");
-}
-
-// Called whenever the server is persisting server state.
-GameDelegate.prototype.persistEvent = function(done) {
-    console.log("Persist event!");
-    done();
-}
+const gameDelegate = new GameDelegate();
 
 // Define how to communicate the player's score to the client.
-function addSetScoreCommand(player, commandList) {
+const addSetScoreCommand = (player, commandList) => {
     commandList.push({
         commandName: "setScore",
-        score: player.score
+        score: player.score,
     });
-}
+};
 
 // Define how to communicate the player's inspiration to the client.
-function addSetInspirationCommand(player, commandList) {
+const addSetInspirationCommand = (player, commandList) => {
     commandList.push({
         commandName: "setInspiration",
-        inspiration: player.extraFields.inspiration
+        inspiration: player.extraFields.inspiration,
     });
-}
+};
 
 // Define how to process the "earnPoints" command.
 gameUtils.addCommandListener(
     "earnPoints", // Command name for the operation.
     true, // Perform operation synchronously.
-    function(command, player, commandList) {
+    (command, player, commandList) => {
         player.score += command.pointAmount;
         addSetScoreCommand(player, commandList);
-    }
+    },
 );
 
 // Define how to process the "getInspiration" command.
 gameUtils.addCommandListener(
     "getInspiration", // Command name for the operation.
     true, // Perform operation synchronously.
-    function(command, player, commandList) {
+    (command, player, commandList) => {
         addSetInspirationCommand(player, commandList);
-    }
+    },
 );
 
 // Define how to process the "asynchronousOperation" command.
 gameUtils.addCommandListener(
     "asynchronousOperation", // Command name for the operation.
     false, // Perform operation asynchronously.
-    function(command, player, commandList, done, errorHandler) {
+    (command, player, commandList, done, errorHandler) => {
         setTimeout(done, 100);
-    }
+    },
 );
 
 // Add a custom timer event.
-function timerEvent() {
+const timerEvent = () => {
     if (gameUtils.isPersistingEverything) {
         return;
     }
-    var index = 0;
-    while (index < gameUtils.playerList.length) {
-        var tempPlayer = gameUtils.playerList[index];
-        tempPlayer.extraFields.inspiration += 1;
-        index += 1;
+    for (const player of gameUtils.playerList) {
+        player.extraFields.inspiration += 1;
     }
-}
+};
 
 setInterval(timerEvent, 1000);
 
 // Set up some extra server endpoints.
-var router = express.Router();
+const router = express.Router();
 
-router.get("/testOne", function(req, res, next) {
+router.get("/testOne", (req, res, next) => {
     pageUtils.renderPage(
         res,
         pageUtils.getConsumerViewPath("test.html"),
         {},
-        {message: "Anyone can view this page!"}
+        { message: "Anyone can view this page!" },
     );
 });
 
-router.get("/testTwo", checkAuthentication(PAGE_ERROR_OUTPUT), function(req, res, next) {
+router.get("/testTwo", checkAuthentication(PAGE_ERROR_OUTPUT), (req, res, next) => {
     pageUtils.renderPage(
         res,
         pageUtils.getConsumerViewPath("test.html"),
         {},
-        {message: "Your username is " + pageUtils.getUsername(req) + "!"}
+        { message: "Your username is " + pageUtils.getUsername(req) + "!" },
     );
 });
 
 console.log("Starting OstracodMultiplayer...");
 
-var tempResult = ostracodMultiplayer.initializeServer(__dirname, gameDelegate, [router]);
+const tempResult = ostracodMultiplayer.initializeServer(__dirname, gameDelegate, [router]);
 
 if (!tempResult) {
     process.exit(1);

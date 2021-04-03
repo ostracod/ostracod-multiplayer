@@ -1,23 +1,21 @@
 
-var fs = require("fs");
-var pathUtils = require("path");
-var express = require("express");
-var router = express.Router();
+const fs = require("fs");
+const pathUtils = require("path");
+const express = require("express");
+const router = express.Router();
 
-module.exports = router;
+const { ostracodMultiplayer } = require("./ostracodMultiplayer");
+const { pageUtils } = require("./pageUtils");
+const { dbUtils } = require("./dbUtils");
+const { accountUtils } = require("./accountUtils");
+const { gameUtils } = require("./gameUtils");
 
-var ostracodMultiplayer = require("./ostracodMultiplayer").ostracodMultiplayer;
-var pageUtils = require("./pageUtils").pageUtils;
-var dbUtils = require("./dbUtils").dbUtils;
-var accountUtils = require("./accountUtils").accountUtils;
-var gameUtils = require("./gameUtils").gameUtils;
+const { checkAuthentication } = pageUtils;
+const {
+    JSON_ERROR_OUTPUT, PAGE_ERROR_OUTPUT, SOCKET_ERROR_OUTPUT,
+} = pageUtils.errorOutput;
 
-var checkAuthentication = pageUtils.checkAuthentication;
-var JSON_ERROR_OUTPUT = pageUtils.errorOutput.JSON_ERROR_OUTPUT;
-var PAGE_ERROR_OUTPUT = pageUtils.errorOutput.PAGE_ERROR_OUTPUT;
-var SOCKET_ERROR_OUTPUT = pageUtils.errorOutput.SOCKET_ERROR_OUTPUT;
-
-router.get("/", function(req, res, next) {
+router.get("/", (req, res, next) => {
     if (pageUtils.isAuthenticated(req)) {
         res.redirect("menu");
     } else {
@@ -25,8 +23,8 @@ router.get("/", function(req, res, next) {
     }
 });
 
-router.get("/login", function(req, res, next) {
-    var tempWelcomePath = pageUtils.getConsumerViewPath(
+router.get("/login", (req, res, next) => {
+    const tempWelcomePath = pageUtils.getConsumerViewPath(
         ostracodMultiplayer.serverConfig.welcomeViewFile
     );
     pageUtils.renderPage(
@@ -35,16 +33,16 @@ router.get("/login", function(req, res, next) {
         {scripts: ["javascript/login.js"]},
         {
             author: ostracodMultiplayer.serverConfig.author,
-            welcomeContent: fs.readFileSync(tempWelcomePath, "utf8")
-        }
+            welcomeContent: fs.readFileSync(tempWelcomePath, "utf8"),
+        },
     );
 });
 
-router.post("/loginAction", function(req, res, next) {
-    var tempUsername = req.body.username;
-    var tempPassword = req.body.password;
-    dbUtils.performTransaction(function(done) {
-        accountUtils.getAccountByUsername(tempUsername, function(error, result) {
+router.post("/loginAction", (req, res, next) => {
+    const tempUsername = req.body.username;
+    const tempPassword = req.body.password;
+    dbUtils.performTransaction((done) => {
+        accountUtils.getAccountByUsername(tempUsername, (error, result) => {
             if (error) {
                 pageUtils.reportDatabaseErrorWithJson(error, req, res);
                 done();
@@ -55,7 +53,7 @@ router.post("/loginAction", function(req, res, next) {
                 done();
                 return;
             }
-            accountUtils.comparePasswordWithHash(tempPassword, result.passwordHash, function(result) {
+            accountUtils.comparePasswordWithHash(tempPassword, result.passwordHash, (result) => {
                 if (!result.success) {
                     pageUtils.reportDatabaseErrorWithJson(result.error, req, res);
                     done();
@@ -67,148 +65,152 @@ router.post("/loginAction", function(req, res, next) {
                     return;
                 }
                 req.session.username = tempUsername;
-                res.json({success: true});
+                res.json({ success: true });
                 done();
             });
         });
-    }, function() {});
+    }, () => {});
 });
 
-router.get("/logoutAction", function(req, res, next) {
+router.get("/logoutAction", (req, res, next) => {
     if (req.session.username) {
         delete req.session["username"];
     }
     res.redirect("login");
 });
 
-router.get("/createAccount", function(req, res, next) {
+router.get("/createAccount", (req, res, next) => {
     pageUtils.renderPage(
         res,
         pageUtils.getLocalViewPath("createAccount.html"),
-        {scripts: ["javascript/createAccount.js"]},
-        {}
+        { scripts: ["javascript/createAccount.js"] },
+        {},
     );
 });
 
-router.post("/createAccountAction", function(req, res, next) {
-    var tempUsername = req.body.username;
-    var tempPassword = req.body.password;
-    var tempEmailAddress = req.body.emailAddress;
+router.post("/createAccountAction", (req, res, next) => {
+    const tempUsername = req.body.username;
+    const tempPassword = req.body.password;
+    const tempEmailAddress = req.body.emailAddress;
     if (tempUsername.length > 30) {
-        res.json({success: false, message: "Your username may not be longer than 30 characters."});
+        res.json({
+            success: false,
+            message: "Your username may not be longer than 30 characters.",
+        });
         return;
     }
-    dbUtils.performTransaction(function(done) {
-        accountUtils.getAccountByUsername(tempUsername, function(error, result) {
+    dbUtils.performTransaction((done) => {
+        accountUtils.getAccountByUsername(tempUsername, (error, result) => {
             if (error) {
                 pageUtils.reportDatabaseErrorWithJson(error, req, res);
                 done();
                 return;
             }
             if (result) {
-                res.json({success: false, message: "An account with that name already exists."});
+                res.json({
+                    success: false,
+                    message: "An account with that name already exists.",
+                });
                 done();
                 return;
             }
-            accountUtils.generatePasswordHash(tempPassword, function(result) {
+            accountUtils.generatePasswordHash(tempPassword, (result) => {
                 if (!result.success) {
                     pageUtils.reportDatabaseErrorWithJson(result.error, req, res);
                     done();
                     return;
                 }
-                var tempPasswordHash = result.hash;
+                const tempPasswordHash = result.hash;
                 accountUtils.addAccount({
                     username: tempUsername,
                     passwordHash: tempPasswordHash,
-                    emailAddress: tempEmailAddress
-                }, function(error) {
+                    emailAddress: tempEmailAddress,
+                }, (error) => {
                     if (error) {
                         pageUtils.reportDatabaseErrorWithJson(error, req, res);
                         done();
                         return;
                     }
-                    res.json({success: true});
+                    res.json({ success: true });
                     done();
                 });
             });
         });
-    }, function() {});
+    }, () => {});
 });
 
-router.get("/changePassword", checkAuthentication(PAGE_ERROR_OUTPUT), function(req, res, next) {
+router.get("/changePassword", checkAuthentication(PAGE_ERROR_OUTPUT), (req, res, next) => {
     pageUtils.renderPage(
         res,
         pageUtils.getLocalViewPath("changePassword.html"),
-        {scripts: ["javascript/changePassword.js"]},
-        {}
+        { scripts: ["javascript/changePassword.js"] },
+        {},
     );
 });
 
-router.post("/changePasswordAction", checkAuthentication(JSON_ERROR_OUTPUT), function(req, res, next) {
-    var tempUsername = pageUtils.getUsername(req);
-    var tempOldPassword = req.body.oldPassword;
-    var tempNewPassword = req.body.newPassword;
-    dbUtils.performTransaction(function(done) {
-        accountUtils.getAccountByUsername(tempUsername, function(error, result) {
+router.post("/changePasswordAction", checkAuthentication(JSON_ERROR_OUTPUT), (req, res, next) => {
+    const tempUsername = pageUtils.getUsername(req);
+    const tempOldPassword = req.body.oldPassword;
+    const tempNewPassword = req.body.newPassword;
+    dbUtils.performTransaction((done) => {
+        accountUtils.getAccountByUsername(tempUsername, (error, result) => {
             if (error) {
                 pageUtils.reportDatabaseErrorWithJson(error, req, res);
                 done();
                 return;
             }
-            var tempAccount = result;
-            accountUtils.comparePasswordWithHash(tempOldPassword, tempAccount.passwordHash, function(result) {
+            const tempAccount = result;
+            accountUtils.comparePasswordWithHash(tempOldPassword, tempAccount.passwordHash, (result) => {
                 if (!result.success) {
                     pageUtils.reportDatabaseErrorWithJson(result.error, req, res);
                     done();
                     return;
                 }
                 if (!result.isMatch) {
-                    res.json({success: false, message: "Incorrect old password."});
+                    res.json({ success: false, message: "Incorrect old password." });
                     done();
                     return;
                 }
-                accountUtils.generatePasswordHash(tempNewPassword, function(result) {
+                accountUtils.generatePasswordHash(tempNewPassword, (result) => {
                     if (!result.success) {
                         pageUtils.reportDatabaseErrorWithJson(result.error, req, res);
                         done();
                         return;
                     }
-                    var tempValueSet = {
-                        passwordHash: result.hash
-                    }
-                    accountUtils.updateAccount(tempAccount.uid, tempValueSet, function(error) {
+                    const tempValueSet = { passwordHash: result.hash };
+                    accountUtils.updateAccount(tempAccount.uid, tempValueSet, (error) => {
                         if (error) {
                             pageUtils.reportDatabaseErrorWithJson(error, req, res);
                             done();
                             return;
                         }
-                        res.json({success: true});
+                        res.json({ success: true });
                         done();
                     });
                 });
             });
         });
-    }, function() {});
+    }, () => {});
 });
 
-router.get("/menu", checkAuthentication(PAGE_ERROR_OUTPUT), function(req, res, next) {
-    var tempUsername = pageUtils.getUsername(req);
-    var tempScore;
-    function renderPage() {
+router.get("/menu", checkAuthentication(PAGE_ERROR_OUTPUT), (req, res, next) => {
+    const tempUsername = pageUtils.getUsername(req);
+    let tempScore;
+    const renderPage = () => {
         pageUtils.renderPage(
             res,
             pageUtils.getLocalViewPath("menu.html"),
             {},
             {
                 username: tempUsername,
-                score: tempScore
-            }
+                score: tempScore,
+            },
         );
-    }
-    var tempPlayer = gameUtils.getPlayerByUsername(tempUsername, true);
+    };
+    const tempPlayer = gameUtils.getPlayerByUsername(tempUsername, true);
     if (tempPlayer === null) {
-        dbUtils.performTransaction(function(done) {
-            accountUtils.getAccountByUsername(tempUsername, function(error, result) {
+        dbUtils.performTransaction((done) => {
+            accountUtils.getAccountByUsername(tempUsername, (error, result) => {
                 if (error) {
                     pageUtils.reportDatabaseErrorWithPage(error, req, res);
                     done();
@@ -218,36 +220,30 @@ router.get("/menu", checkAuthentication(PAGE_ERROR_OUTPUT), function(req, res, n
                 renderPage();
                 done();
             });
-        }, function() {});
+        }, () => {});
     } else {
         tempScore = tempPlayer.score;
         renderPage();
     }
 });
 
-router.get("/game", checkAuthentication(PAGE_ERROR_OUTPUT), function(req, res, next) {
-    var index = 0;
-    var tempModuleList = ostracodMultiplayer.gameConfig.pageModules;
-    while (index < tempModuleList.length) {
-        var tempModule = tempModuleList[index];
-        if (typeof tempModule.viewContent === "undefined"
-                || ostracodMultiplayer.mode == "development") {
-            tempModule.viewContent = fs.readFileSync(tempModule.viewPath, "utf8");
+router.get("/game", checkAuthentication(PAGE_ERROR_OUTPUT), (req, res, next) => {
+    const tempModuleList = ostracodMultiplayer.gameConfig.pageModules;
+    for (const module of tempModuleList) {
+        if (typeof module.viewContent === "undefined"
+                || ostracodMultiplayer.mode === "development") {
+            module.viewContent = fs.readFileSync(module.viewPath, "utf8");
         }
-        index += 1;
     }
-    var tempInstructionsPath = pageUtils.getConsumerViewPath(
-        ostracodMultiplayer.gameConfig.instructionsViewFile
+    const tempInstructionsPath = pageUtils.getConsumerViewPath(
+        ostracodMultiplayer.gameConfig.instructionsViewFile,
     );
-    var tempScriptList = ["javascript/baseGame.js"];
-    var tempScriptList2 = ostracodMultiplayer.gameConfig.scripts;
-    var index = 0;
-    while (index < tempScriptList2.length) {
-        var tempPath = tempScriptList2[index];
-        tempScriptList.push(tempPath);
-        index += 1;
+    const tempScriptList = ["javascript/baseGame.js"];
+    const tempScriptList2 = ostracodMultiplayer.gameConfig.scripts;
+    for (const path of tempScriptList2) {
+        tempScriptList.push(path);
     }
-    var tempCanvasBackgroundColor;
+    let tempCanvasBackgroundColor;
     if ("canvasBackgroundColor" in ostracodMultiplayer.gameConfig) {
         tempCanvasBackgroundColor = ostracodMultiplayer.gameConfig.canvasBackgroundColor;
     } else {
@@ -260,7 +256,7 @@ router.get("/game", checkAuthentication(PAGE_ERROR_OUTPUT), function(req, res, n
             scripts: tempScriptList,
             stylesheets: ostracodMultiplayer.gameConfig.stylesheets,
             shouldDisplayTitle: false,
-            contentWidth: ostracodMultiplayer.gameConfig.canvasWidth / 2 + 380
+            contentWidth: ostracodMultiplayer.gameConfig.canvasWidth / 2 + 380,
         },
         {
             modules: tempModuleList,
@@ -270,27 +266,27 @@ router.get("/game", checkAuthentication(PAGE_ERROR_OUTPUT), function(req, res, n
             framesPerSecond: ostracodMultiplayer.gameConfig.framesPerSecond,
             gameName: ostracodMultiplayer.serverConfig.gameName.toUpperCase(),
             instructions: fs.readFileSync(tempInstructionsPath, "utf8"),
-            debugMode: (ostracodMultiplayer.mode == "development")
-        }
+            debugMode: (ostracodMultiplayer.mode === "development"),
+        },
     );
 });
 
-router.ws("/gameUpdate", checkAuthentication(SOCKET_ERROR_OUTPUT), function(ws, req, next) {
+router.ws("/gameUpdate", checkAuthentication(SOCKET_ERROR_OUTPUT), (ws, req, next) => {
     console.log("Opening socket.");
-    ws.on("message", function(message) {
-        var tempCommandList = JSON.parse(message);
+    ws.on("message", (message) => {
+        const tempCommandList = JSON.parse(message);
         if (ostracodMultiplayer.mode === "development") {
-            setTimeout(function() {
+            setTimeout(() => {
                 performUpdate(tempCommandList);
             }, 50 + Math.floor(Math.random() * 150));
         } else {
             performUpdate(tempCommandList);
         }
     });
-    function performUpdate(commandList) {
-        gameUtils.performUpdate(pageUtils.getUsername(req), commandList, function(result) {
-            var tempRetryCount = 0;
-            function tryToSendResponse() {
+    const performUpdate = (commandList) => {
+        gameUtils.performUpdate(pageUtils.getUsername(req), commandList, (result) => {
+            let tempRetryCount = 0;
+            const tryToSendResponse = () => {
                 try {
                     ws.send(JSON.stringify(result));
                 } catch (error) {
@@ -302,27 +298,25 @@ router.ws("/gameUpdate", checkAuthentication(SOCKET_ERROR_OUTPUT), function(ws, 
                         console.log("Exceeded maximum number of retries.");
                     }
                 }
-            }
+            };
             tryToSendResponse();
         });
-    }
+    };
 });
 
-router.get("/leaderboard", function(req, res, next) {
-    dbUtils.performTransaction(function(done) {
-        accountUtils.getLeaderboardAccounts(20, function(error, accountList) {
+router.get("/leaderboard", (req, res, next) => {
+    dbUtils.performTransaction((done) => {
+        accountUtils.getLeaderboardAccounts(20, (error, accountList) => {
             if (error) {
                 pageUtils.reportDatabaseErrorWithPage(error, req, res);
                 done();
                 return;
             }
-            var index = 0;
-            while (index < accountList.length) {
-                var tempAccount = accountList[index];
+            for (let index = 0; index < accountList.length; index++) {
+                const tempAccount = accountList[index];
                 tempAccount.ordinalNumber = index + 1;
-                index += 1;
             }
-            var tempUrl = pageUtils.generateReturnUrl(req);
+            const tempUrl = pageUtils.generateReturnUrl(req);
             pageUtils.renderPage(
                 res,
                 pageUtils.getLocalViewPath("leaderboard.html"),
@@ -330,12 +324,14 @@ router.get("/leaderboard", function(req, res, next) {
                 {
                     accountList: accountList,
                     url: tempUrl.url,
-                    urlLabel: tempUrl.urlLabel
-                }
+                    urlLabel: tempUrl.urlLabel,
+                },
             );
             done();
         });
-    }, function() {});
+    }, () => {});
 });
+
+module.exports = router;
 
 

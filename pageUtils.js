@@ -1,159 +1,167 @@
 
-var fs = require("fs");
-var pathUtils = require("path");
-var Mustache = require("mustache");
+const fs = require("fs");
+const pathUtils = require("path");
+const Mustache = require("mustache");
 
-function PageUtils() {
+class PageUtils {
     
-}
-
-var pageUtils = new PageUtils();
-
-module.exports = {
-    pageUtils: pageUtils
-};
-
-var ostracodMultiplayer = require("./ostracodMultiplayer").ostracodMultiplayer;
-
-PageUtils.prototype.renderPage = function(res, path, options, parameters) {
-    function getOption(name, defaultValue) {
-        if (typeof options[name] === "undefined") {
-            return defaultValue;
-        }
-        return options[name];
-    }
-    var tempScriptList = getOption("scripts", []);
-    var tempStylesheetList = getOption("stylesheets", []);
-    var tempShouldDisplayTitle = getOption("shouldDisplayTitle", true);
-    var tempContentWidth = getOption("contentWidth", 680);
-    if ("stylesheets" in ostracodMultiplayer.serverConfig) {
-        var tempDefaultStylesheetList = ostracodMultiplayer.serverConfig.stylesheets;
-        tempStylesheetList = tempStylesheetList.slice();
-        var index = 0;
-        while (index < tempDefaultStylesheetList.length) {
-            var tempStylesheet = tempDefaultStylesheetList[index];
-            tempStylesheetList.unshift(tempStylesheet);
-            index += 1;
-        }
-    }
-    var tempTemplate = fs.readFileSync(path, "utf8");
-    var tempContent = Mustache.render(tempTemplate, parameters);
-    res.render("template.html", {
-        gameName: ostracodMultiplayer.serverConfig.gameName.toUpperCase(),
-        scripts: tempScriptList,
-        stylesheets: tempStylesheetList,
-        shouldDisplayTitle: tempShouldDisplayTitle,
-        content: tempContent,
-        contentWidth: tempContentWidth
-    });
-}
-
-PageUtils.prototype.getLocalViewPath = function(fileName) {
-    return pathUtils.join(ostracodMultiplayer.localViewsDirectory, fileName);
-}
-
-PageUtils.prototype.getConsumerViewPath = function(fileName) {
-    return pathUtils.join(ostracodMultiplayer.consumerViewsDirectory, fileName);
-}
-
-PageUtils.prototype.serveMessagePage = function(res, message, url, urlLabel) {
-    pageUtils.renderPage(
-        res,
-        pageUtils.getLocalViewPath("message.html"),
-        {},
-        {
-            message: message,
-            url: url,
-            urlLabel: urlLabel
-        }
-    );
-}
-
-PageUtils.prototype.generateReturnUrl = function(req) {
-    if (pageUtils.isAuthenticated(req)) {
-        return {
-            url: "/menu",
-            urlLabel: "Return to Main Menu"
-        };
-    } else {
-        return {
-            url: "/login",
-            urlLabel: "Return to Login Page"
+    constructor() {
+        this.errorOutput = {
+            JSON_ERROR_OUTPUT: 0,
+            PAGE_ERROR_OUTPUT: 1,
+            SOCKET_ERROR_OUTPUT: 2,
         };
     }
-}
-
-PageUtils.prototype.reportDatabaseErrorWithJson = function(error, req, res) {
-    res.json({success: false, message: "An error occurred. Please contact an administrator."});
-    console.log(error);
-}
-
-PageUtils.prototype.reportDatabaseErrorWithPage = function(error, req, res) {
-    var tempUrl = pageUtils.generateReturnUrl(req);
-    pageUtils.serveMessagePage(res, "An error occurred. Please contact an administrator.", tempUrl.url, tempUrl.urlLabel);
-    console.log(error);
-}
-
-PageUtils.prototype.reportDatabaseError = function(error, errorOutput, req, res) {
-    console.log(error);
-    if (errorOutput == pageUtils.errorOutput.JSON_ERROR_OUTPUT) {
-        pageUtils.reportDatabaseErrorWithJson(error, req, res);
-    }
-    if (errorOutput == pageUtils.errorOutput.PAGE_ERROR_OUTPUT) {
-        pageUtils.reportDatabaseErrorWithPage(error, req, res);
-    }
-}
-
-PageUtils.prototype.getUsername = function(req) {
-    return req.session.username;
-}
-
-PageUtils.prototype.isAuthenticated = function(req) {
-    if (ostracodMultiplayer.mode == "development") {
-        if (!req.session.username) {
-            var tempUsername = req.query.username;
-            if (tempUsername) {
-                req.session.username = tempUsername;
+    
+    renderPage(res, path, options, parameters) {
+        const getOption = (name, defaultValue) => {
+            if (typeof options[name] === "undefined") {
+                return defaultValue;
+            }
+            return options[name];
+        };
+        const tempScriptList = getOption("scripts", []);
+        let tempStylesheetList = getOption("stylesheets", []);
+        const tempShouldDisplayTitle = getOption("shouldDisplayTitle", true);
+        const tempContentWidth = getOption("contentWidth", 680);
+        if ("stylesheets" in ostracodMultiplayer.serverConfig) {
+            const tempDefaultStylesheetList = ostracodMultiplayer.serverConfig.stylesheets;
+            tempStylesheetList = tempStylesheetList.slice();
+            for (const stylesheet of tempDefaultStylesheetList) {
+                tempStylesheetList.unshift(stylesheet);
             }
         }
+        const tempTemplate = fs.readFileSync(path, "utf8");
+        const tempContent = Mustache.render(tempTemplate, parameters);
+        res.render("template.html", {
+            gameName: ostracodMultiplayer.serverConfig.gameName.toUpperCase(),
+            scripts: tempScriptList,
+            stylesheets: tempStylesheetList,
+            shouldDisplayTitle: tempShouldDisplayTitle,
+            content: tempContent,
+            contentWidth: tempContentWidth,
+        });
     }
-    return (typeof req.session.username !== "undefined");
-}
-
-PageUtils.prototype.checkAuthentication = function(errorOutput) {
-    if (errorOutput == pageUtils.errorOutput.SOCKET_ERROR_OUTPUT) {
-        return function(ws, req, next) {
-            if (pageUtils.isAuthenticated(req)) {
-                next();
-            } else {
-                ws.on("message", function(message) {
-                    ws.send(JSON.stringify({
-                        success: false,
-                        message: "You are not currently logged in."
-                    }));
-                });
-            }
-        };
-    } else {
-        return function(req, res, next) {
-            if (pageUtils.isAuthenticated(req)) {
-                next();
-            } else {
-                if (errorOutput == pageUtils.errorOutput.JSON_ERROR_OUTPUT) {
-                    res.json({success: false, message: "You are not currently logged in."});
-                }
-                if (errorOutput == pageUtils.errorOutput.PAGE_ERROR_OUTPUT) {
-                    pageUtils.serveMessagePage(res, "You must be logged in to view that page.", "login", "Log In");
+    
+    getLocalViewPath(fileName) {
+        return pathUtils.join(ostracodMultiplayer.localViewsDirectory, fileName);
+    }
+    
+    getConsumerViewPath(fileName) {
+        return pathUtils.join(ostracodMultiplayer.consumerViewsDirectory, fileName);
+    }
+    
+    serveMessagePage(res, message, url, urlLabel) {
+        pageUtils.renderPage(
+            res,
+            pageUtils.getLocalViewPath("message.html"),
+            {},
+            { message, url, urlLabel },
+        );
+    }
+    
+    generateReturnUrl(req) {
+        if (pageUtils.isAuthenticated(req)) {
+            return {
+                url: "/menu",
+                urlLabel: "Return to Main Menu",
+            };
+        } else {
+            return {
+                url: "/login",
+                urlLabel: "Return to Login Page",
+            };
+        }
+    }
+    
+    reportDatabaseErrorWithJson(error, req, res) {
+        res.json({
+            success: false,
+            message: "An error occurred. Please contact an administrator.",
+        });
+        console.log(error);
+    }
+    
+    reportDatabaseErrorWithPage(error, req, res) {
+        const tempUrl = pageUtils.generateReturnUrl(req);
+        pageUtils.serveMessagePage(
+            res,
+            "An error occurred. Please contact an administrator.",
+            tempUrl.url,
+            tempUrl.urlLabel,
+        );
+        console.log(error);
+    }
+    
+    reportDatabaseError(error, errorOutput, req, res) {
+        console.log(error);
+        if (errorOutput === pageUtils.errorOutput.JSON_ERROR_OUTPUT) {
+            pageUtils.reportDatabaseErrorWithJson(error, req, res);
+        }
+        if (errorOutput === pageUtils.errorOutput.PAGE_ERROR_OUTPUT) {
+            pageUtils.reportDatabaseErrorWithPage(error, req, res);
+        }
+    }
+    
+    getUsername(req) {
+        return req.session.username;
+    }
+    
+    isAuthenticated(req) {
+        if (ostracodMultiplayer.mode === "development") {
+            if (!req.session.username) {
+                const tempUsername = req.query.username;
+                if (tempUsername) {
+                    req.session.username = tempUsername;
                 }
             }
-        };
+        }
+        return (typeof req.session.username !== "undefined");
+    }
+    
+    checkAuthentication(errorOutput) {
+        if (errorOutput === pageUtils.errorOutput.SOCKET_ERROR_OUTPUT) {
+            return (ws, req, next) => {
+                if (pageUtils.isAuthenticated(req)) {
+                    next();
+                } else {
+                    ws.on("message", (message) => {
+                        ws.send(JSON.stringify({
+                            success: false,
+                            message: "You are not currently logged in.",
+                        }));
+                    });
+                }
+            };
+        } else {
+            return (req, res, next) => {
+                if (pageUtils.isAuthenticated(req)) {
+                    next();
+                } else {
+                    if (errorOutput === pageUtils.errorOutput.JSON_ERROR_OUTPUT) {
+                        res.json({
+                            success: false,
+                            message: "You are not currently logged in.",
+                        });
+                    }
+                    if (errorOutput === pageUtils.errorOutput.PAGE_ERROR_OUTPUT) {
+                        pageUtils.serveMessagePage(
+                            res,
+                            "You must be logged in to view that page.",
+                            "login",
+                            "Log In",
+                        );
+                    }
+                }
+            };
+        }
     }
 }
 
-PageUtils.prototype.errorOutput = {
-    JSON_ERROR_OUTPUT: 0,
-    PAGE_ERROR_OUTPUT: 1,
-    SOCKET_ERROR_OUTPUT: 2
-}
+const pageUtils = new PageUtils();
+
+module.exports = { pageUtils };
+
+const { ostracodMultiplayer } = require("./ostracodMultiplayer");
 
 

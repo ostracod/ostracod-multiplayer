@@ -1,16 +1,10 @@
 
-var ostracodMultiplayer = require("./ostracodMultiplayer").ostracodMultiplayer;
-var pageUtils = require("./pageUtils").pageUtils;
-var dbUtils = require("./dbUtils").dbUtils;
-var accountUtils = require("./accountUtils").accountUtils;
-var gameUtils = require("./gameUtils").gameUtils;
+const { ostracodMultiplayer } = require("./ostracodMultiplayer");
+const { pageUtils } = require("./pageUtils");
+const { dbUtils } = require("./dbUtils");
+const { accountUtils } = require("./accountUtils");
+const { gameUtils } = require("./gameUtils");
 
-module.exports = {
-    ostracodMultiplayer: ostracodMultiplayer,
-    pageUtils: pageUtils,
-    dbUtils: dbUtils,
-    accountUtils: accountUtils,
-    gameUtils: gameUtils
-}
+module.exports = { ostracodMultiplayer, pageUtils, dbUtils, accountUtils, gameUtils };
 
 

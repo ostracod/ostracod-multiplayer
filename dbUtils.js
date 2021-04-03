@@ -1,110 +1,105 @@
 
-var fs = require("fs");
-var pathUtils = require("path");
-var mysql = require("mysql");
+const fs = require("fs");
+const pathUtils = require("path");
+const mysql = require("mysql");
 
-var databaseConfig;
-var databaseLock = false;
-var connection;
-
-function DbUtils() {
-
-}
-
-var dbUtils = new DbUtils();
-
-module.exports = {
-    dbUtils: dbUtils
-};
-
-var ostracodMultiplayer = require("./ostracodMultiplayer").ostracodMultiplayer;
-
-DbUtils.prototype.initialize = function() {
-    databaseConfig = JSON.parse(fs.readFileSync(
-        pathUtils.join(ostracodMultiplayer.configDirectory, "databaseConfig.json"),
-        "utf8"
-    ));
-}
-
-DbUtils.prototype.generatePasswordHash = function(password, done) {
-    bcrypt.hash(password, 10, function(error, result) {
-        if (error) {
-            done({
-                success: false,
-                error: error
-            });
-            return;
-        }
-        done({
-            success: true,
-            hash: result
-        });
-    });
-}
-
-DbUtils.prototype.comparePasswordWithHash = function(password, hash, done) {
-    bcrypt.compare(password, hash, function(error, result) {
-        if (error) {
-            done({
-                success: false,
-                error: error
-            });
-            return;
-        }
-        done({
-            success: true,
-            isMatch: result
-        });
-    });
-}
-
-DbUtils.prototype.convertSqlErrorToText = function(error) {
-    return error.code + ": " + error.sqlMessage;
-}
-
-DbUtils.prototype.startTransaction = function(done) {
-    if (databaseLock) {
-        setTimeout(function() {
-            dbUtils.startTransaction(done);
-        }, 2);
-    } else {
-        databaseLock = true;
-        connection = mysql.createConnection({
-            host: databaseConfig.host,
-            user: databaseConfig.username,
-            password: databaseConfig.password,
-            database: databaseConfig.databaseName
-        });
-        connection.connect(function(error) {
+class DbUtils {
+    
+    initialize() {
+        this.databaseConfig = JSON.parse(fs.readFileSync(
+            pathUtils.join(ostracodMultiplayer.configDirectory, "databaseConfig.json"),
+            "utf8",
+        ));
+        this.databaseLock = false;
+        this.connection = null;
+    }
+    
+    generatePasswordHash(password, done) {
+        bcrypt.hash(password, 10, (error, result) => {
             if (error) {
-                console.log(dbUtils.convertSqlErrorToText(error));
+                done({
+                    success: false,
+                    error: error,
+                });
                 return;
             }
-            done();
+            done({
+                success: true,
+                hash: result,
+            });
         });
+    }
+    
+    comparePasswordWithHash(password, hash, done) {
+        bcrypt.compare(password, hash, (error, result) => {
+            if (error) {
+                done({
+                    success: false,
+                    error: error,
+                });
+                return;
+            }
+            done({
+                success: true,
+                isMatch: result,
+            });
+        });
+    }
+    
+    convertSqlErrorToText(error) {
+        return error.code + ": " + error.sqlMessage;
+    }
+    
+    startTransaction(done) {
+        if (this.databaseLock) {
+            setTimeout(() => {
+                dbUtils.startTransaction(done);
+            }, 2);
+        } else {
+            this.databaseLock = true;
+            this.connection = mysql.createConnection({
+                host: this.databaseConfig.host,
+                user: this.databaseConfig.username,
+                password: this.databaseConfig.password,
+                database: this.databaseConfig.databaseName,
+            });
+            this.connection.connect((error) => {
+                if (error) {
+                    console.log(dbUtils.convertSqlErrorToText(error));
+                    return;
+                }
+                done();
+            });
+        }
+    }
+    
+    finishTransaction() {
+        this.connection.destroy();
+        this.databaseLock = false;
+    }
+    
+    performTransaction(operation, done) {
+        dbUtils.startTransaction(() => {
+            operation(() => {
+                dbUtils.finishTransaction();
+                done();
+            });
+        });
+    }
+    
+    performQuery(query, parameterList, done) {
+        if (!this.databaseLock) {
+            console.log("Missing lock!");
+            return;
+        }
+        this.connection.query(query, parameterList, done);
     }
 }
 
-DbUtils.prototype.finishTransaction = function() {
-    connection.destroy();
-    databaseLock = false;
-}
+const dbUtils = new DbUtils();
 
-DbUtils.prototype.performTransaction = function(operation, done) {
-    dbUtils.startTransaction(function() {
-        operation(function() {
-            dbUtils.finishTransaction();
-            done();
-        });
-    });
-}
+module.exports = { dbUtils };
 
-DbUtils.prototype.performQuery = function(query, parameterList, done) {
-    if (!databaseLock) {
-        console.log("Missing lock!");
-        return;
-    }
-    connection.query(query, parameterList, done);
-}
+const { ostracodMultiplayer } = require("./ostracodMultiplayer");
 
 
