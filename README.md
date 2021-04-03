@@ -13,19 +13,28 @@ Feel free to use this module for yourself, but I really designed it for my own u
 
 ## Installation
 
-This module requires MySQL version 5.x. To install on macOS:
+This module requires MySQL version 8.x. To install on macOS:
 
 ```
-brew install mysql@5.7
-brew services start mysql@5.7
+brew install mysql@8.0
+brew services start mysql@8.0
 ```
 
-To install on Ubuntu, I recommend [this page](https://www.digitalocean.com/community/tutorials/how-to-install-mysql-on-ubuntu-16-04).
+To install on Ubuntu, I recommend [this page](https://www.digitalocean.com/community/tutorials/how-to-install-mysql-on-ubuntu-20-04).
+
+Then update authentication to allow username + password combination:
+
+```
+mysql -u your_username -p
+ALTER USER 'your_username'@'localhost' IDENTIFIED WITH mysql_native_password BY 'your_password';
+FLUSH PRIVILEGES;
+quit
+```
 
 To install the Node.js module:
 
 ```
-npm install github:ostracod/ostracod-multiplayer
+npm install "github:ostracod/ostracod-multiplayer#semver:^(Version)"
 ```
 
 Your project should have these directories at the top level:
