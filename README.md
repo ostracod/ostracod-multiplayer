@@ -170,10 +170,12 @@ This module exposes the following members:
 
 Members of `ostracodMultiplayer`:
 
-* `ostracodMultiplayer.initializeServer(basePath, gameDelegate, routerList)`: Starts running the server.
+* `ostracodMultiplayer.shouldListenImmediately`: Whether the server should start listening for HTTP requests upon calling `initializeServer`. The default value is true.
+* `ostracodMultiplayer.initializeServer(basePath, gameDelegate, routerList)`: Initializes the server, and starts listening for HTTP requests if `shouldListenImmediately` is true.
     * `basePath` should point to the top level of your project.
     * `gameDelegate` must be your custom implementation of `GameDelegate`.
     * `routerList` is a list of Express routers for additional endpoints.
+* `ostracodMultiplayer.listen()`: Causes the server to start listening for HTTP requests.
 * `ostracodMultiplayer.mode`: Either `"development"` or `"production"`.
 
 Members of `pageUtils`:

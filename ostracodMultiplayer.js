@@ -24,6 +24,15 @@ class OstracodMultiplayer {
         this.consumerViewsDirectory = null;
         this.localViewsDirectory = null;
         this.gameDelegate = null;
+        this.server = null;
+        this.shouldListenImmediately = true;
+    }
+    
+    listen() {
+        const portNumber = this.serverConfig.port;
+        this.server.listen(portNumber, () => {
+            console.log("Listening on port " + portNumber + ".");
+        });
     }
     
     initializeServer(basePath, gameDelegate, routerList) {
@@ -81,9 +90,8 @@ class OstracodMultiplayer {
             return false;
         }
         
-        let server;
         if (this.mode === "development") {
-            server = http.createServer(this.expressApp);
+            this.server = http.createServer(this.expressApp);
         } else {
             const privateKey = fs.readFileSync(
                 pathUtils.join(this.configDirectory, "ssl.key"), "utf8",
@@ -96,9 +104,9 @@ class OstracodMultiplayer {
             if (fs.existsSync(tempPath)) {
                 credentials.ca = fs.readFileSync(tempPath);
             }
-            server = https.createServer(credentials, this.expressApp);
+            this.server = https.createServer(credentials, this.expressApp);
         }
-        expressWs(this.expressApp, server);
+        expressWs(this.expressApp, this.server);
         
         this.expressApp.set("views", this.localViewsDirectory);
         this.expressApp.engine("html", mustacheExpress());
@@ -166,11 +174,9 @@ class OstracodMultiplayer {
         dbUtils.initialize();
         gameUtils.initialize();
         
-        const portNumber = this.serverConfig.port;
-        
-        server.listen(portNumber, () => {
-            console.log("Listening on port " + portNumber + ".");
-        });
+        if (this.shouldListenImmediately) {
+            this.listen();
+        }
         
         return true;
     }
