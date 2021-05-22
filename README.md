@@ -256,6 +256,7 @@ The global scope in the game page exposes the following members:
 * `canvasBackgroundColor`: Color string as defined in your config file.
 * `framesPerSecond`: FPS as defined in your config file.
 * `shiftKeyIsHeld`: Whether the user is pressing the shift key.
+* `canvasMouseIsHeld`: Whether the user is holding the mouse button after clicking on the canvas.
 * `gameUpdateCommandList`: List of commands to send to the server.
 * `focusedTextInput`: HTML tag of focused text input.
 * `clientDelegate`: You must assign a value to this in your script.
@@ -265,6 +266,7 @@ The global scope in the game page exposes the following members:
 
 Members of `Pos`:
 
+* `new Pos(x, y)`
 * `pos.x` and `pos.y`
 * `pos.set(pos)`
 * `pos.add(pos)`
@@ -277,6 +279,7 @@ Members of `Pos`:
 
 Members of `Color`:
 
+* `new Color(r, g, b)`
 * `color.r`, `color.g`, and `color.b`
 * `color.copy()`
 * `color.scale(number)`
@@ -291,5 +294,11 @@ Your client script must create a `ClientDelegate` and assign it to the global va
 * `clientDelegate.timerEvent()`: Called for each client frame.
 * `clientDelegate.keyDownEvent(keyCode)`: Called whenever the user presses a key. Return false to override default browser action, and true otherwise.
 * `clientDelegate.keyUpEvent(keyCode)`: Called whenever the user releases a key. Return false to override default browser action, and true otherwise.
+* `clientDelegate.moduleShowEvent(name)` (Optional): Called whenever a page module is opened.
+* `clientDelegate.moduleHideEvent(name)` (Optional): Called whenever a page module is closed.
+* `clientDelegate.canvasMouseMoveEvent(pos)` (Optional): Called whenever the user moves the mouse within the canvas.
+* `clientDelegate.canvasMouseDownEvent(pos)` (Optional): Called whenever the user presses the the mouse button down inside the canvas.
+* `clientDelegate.canvasMouseLeaveEvent()` (Optional): Called whenever the user moves the mouse outside of the canvas.
+* `clientDelegate.mouseUpEvent()` (Optional): Called whenever the user releases the mouse button anywhere on the page.
 
 

@@ -4,8 +4,10 @@ var context;
 var canvasWidth;
 var canvasHeight;
 var canvasBackgroundColor;
+var canvasBorderWidth = 3;
 var framesPerSecond;
 var shiftKeyIsHeld = false;
+var canvasMouseIsHeld = false;
 var chatInput;
 var chatOutput;
 var chatMessageTagList = [];
@@ -241,12 +243,18 @@ Module.prototype.show = function() {
     this.isVisible = true;
     this.tag.style.display = "block";
     this.updateButtonClass();
+    if ("moduleShowEvent" in clientDelegate) {
+        clientDelegate.moduleShowEvent(this.name);
+    }
 }
 
 Module.prototype.hide = function() {
     this.isVisible = false;
     this.tag.style.display = "none";
     this.updateButtonClass();
+    if ("moduleHideEvent" in clientDelegate) {
+        clientDelegate.moduleHideEvent(this.name);
+    }
 }
 
 function getModuleByName(name) {
@@ -292,6 +300,19 @@ function configureTextInputFocusHandlers(tag) {
     }
 }
 
+function showOverlayChatInput() {
+    document.getElementById("overlayChat").style.display = "block";
+    overlayChatInput.style.display = "block";
+    overlayChatInputIsVisible = true;
+    overlayChatInput.focus();
+}
+
+function hideOverlayChatInput() {
+    overlayChatInput.style.display = "none";
+    overlayChatInputIsVisible = false;
+    overlayChatInput.blur();
+}
+
 function baseKeyDownEvent(event) {
     lastActivityTime = 0;
     var keyCode = event.which;
@@ -313,16 +334,11 @@ function baseKeyDownEvent(event) {
                 addAddChatMessageCommand(tempText);
                 overlayChatInput.value = "";
             }
-            overlayChatInput.style.display = "none";
-            overlayChatInputIsVisible = false;
-            overlayChatInput.blur();
+            hideOverlayChatInput();
         }
     } else if (focusedTextInput === null) {
         if (keyCode == 13) {
-            document.getElementById("overlayChat").style.display = "block";
-            overlayChatInput.style.display = "block";
-            overlayChatInputIsVisible = true;
-            overlayChatInput.focus();
+            showOverlayChatInput();
         }
     }
     return clientDelegate.keyDownEvent(keyCode);
@@ -394,6 +410,52 @@ function baseTimerEvent() {
     clientDelegate.timerEvent();
 }
 
+function convertCanvasMouseEventToPos(event) {
+    var x = event.offsetX - canvasBorderWidth;
+    var y = event.offsetY - canvasBorderWidth;
+    if (x < 0 || x >= canvasWidth || y < 0 || y >= canvasHeight) {
+        return null;
+    }
+    return new Pos(x, y);
+}
+
+function baseCanvasClickEvent() {
+    hideOverlayChatInput();
+}
+
+function baseCanvasMouseMoveEvent(event) {
+    if ("canvasMouseMoveEvent" in clientDelegate) {
+        var pos = convertCanvasMouseEventToPos(event);
+        if (pos !== null) {
+            clientDelegate.canvasMouseMoveEvent(pos);
+        }
+    }
+}
+
+function baseCanvasMouseDownEvent(event) {
+    canvasMouseIsHeld = true;
+    if ("canvasMouseDownEvent" in clientDelegate) {
+        var pos = convertCanvasMouseEventToPos(event);
+        if (pos !== null) {
+            clientDelegate.canvasMouseDownEvent(pos);
+        }
+    }
+    return false;
+}
+
+function baseCanvasMouseLeaveEvent() {
+    if ("canvasMouseLeaveEvent" in clientDelegate) {
+        clientDelegate.canvasMouseLeaveEvent();
+    }
+}
+
+function baseMouseUpEvent() {
+    canvasMouseIsHeld = false;
+    if ("mouseUpEvent" in clientDelegate) {
+        clientDelegate.mouseUpEvent();
+    }
+}
+
 function baseInitializeGame() {
     
     canvas = document.getElementById("canvas");
@@ -403,12 +465,13 @@ function baseInitializeGame() {
     canvas.height = canvasHeight;
     canvas.style.width = canvasWidth / 2;
     canvas.style.height = canvasHeight / 2;
-    canvas.style.border = "3px #000000 solid";
+    canvas.style.border = canvasBorderWidth + "px #000000 solid";
     
-    canvas.onclick = function(event) {
-        overlayChatInput.style.display = "none";
-        overlayChatInputIsVisible = false;
-    }
+    canvas.onclick = baseCanvasClickEvent;
+    canvas.onmousemove = baseCanvasMouseMoveEvent;
+    canvas.onmousedown = baseCanvasMouseDownEvent;
+    canvas.onmouseleave = baseCanvasMouseLeaveEvent;
+    document.getElementsByTagName("body")[0].onmouseup = baseMouseUpEvent;
     
     chatInput = document.getElementById("chatInput");
     chatOutput = document.getElementById("chatOutput");

@@ -69,8 +69,8 @@ input:not([type]), input:[type="text"] {
 
 .module {
     border-top: 2px #CCCCCC solid;
-    margin-top: 8px;
-    margin-bottom: 8px;
+    margin-top: 12px;
+    margin-bottom: 12px;
 }
 
 .closeButton {
@@ -78,6 +78,12 @@ input:not([type]), input:[type="text"] {
     height: 36px;
     width: 36px;
     border-radius: 18px;
+    font-size: 29px;
+    font-weight: normal;
+    padding-left: 0px;
+    padding-right: 0px;
+    padding-top: 2px;
+    padding-bottom: 0px;
     margin-top: 4px;
     margin-bottom: 4px;
 }
