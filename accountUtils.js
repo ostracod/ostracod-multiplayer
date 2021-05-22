@@ -6,10 +6,7 @@ class AccountUtils {
     generatePasswordHash(password, done) {
         bcrypt.hash(password, 10, (error, result) => {
             if (error) {
-                done({
-                    success: false,
-                    error: error,
-                });
+                done({ success: false, error });
                 return;
             }
             done({
@@ -18,14 +15,11 @@ class AccountUtils {
             });
         });
     }
-    
+
     comparePasswordWithHash(password, hash, done) {
         bcrypt.compare(password, hash, (error, result) => {
             if (error) {
-                done({
-                    success: false,
-                    error: error,
-                });
+                done({ success: false, error });
                 return;
             }
             done({
@@ -39,7 +33,7 @@ class AccountUtils {
         dbUtils.performQuery(
             "INSERT INTO Users (username, passwordHash, emailAddress, score) VALUES (?, ?, ?, 0)",
             [account.username, account.passwordHash, account.emailAddress],
-            (error, results, fields) => {
+            (error) => {
                 if (error) {
                     done(dbUtils.convertSqlErrorToText(error));
                     return;
@@ -53,7 +47,7 @@ class AccountUtils {
         dbUtils.performQuery(
             "SELECT * FROM Users WHERE username = ?",
             [username],
-            (error, results, fields) => {
+            (error, results) => {
                 if (error) {
                     done(dbUtils.convertSqlErrorToText(error), null);
                     return;
@@ -80,7 +74,7 @@ class AccountUtils {
         dbUtils.performQuery(
             "UPDATE Users SET " + tempQueryText + " WHERE uid = ?",
             tempValueList,
-            (error, results, fields) => {
+            (error) => {
                 if (error) {
                     done(dbUtils.convertSqlErrorToText(error));
                     return;
@@ -94,7 +88,7 @@ class AccountUtils {
         dbUtils.performQuery(
             "DELETE FROM Users WHERE uid = ?",
             [uid],
-            (error, results, fields) => {
+            (error) => {
                 if (error) {
                     done(dbUtils.convertSqlErrorToText(error));
                     return;
@@ -108,7 +102,7 @@ class AccountUtils {
         dbUtils.performQuery(
             "SELECT * FROM Users ORDER BY score DESC LIMIT 20",
             [],
-            (error, results, fields) => {
+            (error, results) => {
                 if (error) {
                     done(dbUtils.convertSqlErrorToText(error), null);
                     return;

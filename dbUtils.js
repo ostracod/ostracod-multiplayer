@@ -14,38 +14,6 @@ class DbUtils {
         this.connection = null;
     }
     
-    generatePasswordHash(password, done) {
-        bcrypt.hash(password, 10, (error, result) => {
-            if (error) {
-                done({
-                    success: false,
-                    error: error,
-                });
-                return;
-            }
-            done({
-                success: true,
-                hash: result,
-            });
-        });
-    }
-    
-    comparePasswordWithHash(password, hash, done) {
-        bcrypt.compare(password, hash, (error, result) => {
-            if (error) {
-                done({
-                    success: false,
-                    error: error,
-                });
-                return;
-            }
-            done({
-                success: true,
-                isMatch: result,
-            });
-        });
-    }
-    
     convertSqlErrorToText(error) {
         return error.code + ": " + error.sqlMessage;
     }

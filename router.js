@@ -1,7 +1,7 @@
 
 const fs = require("fs");
-const pathUtils = require("path");
 const express = require("express");
+// eslint-disable-next-line new-cap
 const router = express.Router();
 
 const { ostracodMultiplayer } = require("./ostracodMultiplayer");
@@ -15,7 +15,7 @@ const {
     JSON_ERROR_OUTPUT, PAGE_ERROR_OUTPUT, SOCKET_ERROR_OUTPUT,
 } = pageUtils.errorOutput;
 
-router.get("/", (req, res, next) => {
+router.get("/", (req, res) => {
     if (pageUtils.isAuthenticated(req)) {
         res.redirect("menu");
     } else {
@@ -23,14 +23,14 @@ router.get("/", (req, res, next) => {
     }
 });
 
-router.get("/login", (req, res, next) => {
+router.get("/login", (req, res) => {
     const tempWelcomePath = pageUtils.getConsumerViewPath(
-        ostracodMultiplayer.serverConfig.welcomeViewFile
+        ostracodMultiplayer.serverConfig.welcomeViewFile,
     );
     pageUtils.renderPage(
         res,
         pageUtils.getLocalViewPath("login.html"),
-        {scripts: ["javascript/login.js"]},
+        { scripts: ["javascript/login.js"] },
         {
             author: ostracodMultiplayer.serverConfig.author,
             welcomeContent: fs.readFileSync(tempWelcomePath, "utf8"),
@@ -38,7 +38,7 @@ router.get("/login", (req, res, next) => {
     );
 });
 
-router.post("/loginAction", (req, res, next) => {
+router.post("/loginAction", (req, res) => {
     const tempUsername = req.body.username;
     const tempPassword = req.body.password;
     dbUtils.performTransaction((done) => {
@@ -49,7 +49,7 @@ router.post("/loginAction", (req, res, next) => {
                 return;
             }
             if (!result) {
-                res.json({success: false, message: "Bad account credentials."});
+                res.json({ success: false, message: "Bad account credentials." });
                 done();
                 return;
             }
@@ -60,7 +60,7 @@ router.post("/loginAction", (req, res, next) => {
                     return;
                 }
                 if (!result.isMatch) {
-                    res.json({success: false, message: "Bad account credentials."});
+                    res.json({ success: false, message: "Bad account credentials." });
                     done();
                     return;
                 }
@@ -72,14 +72,14 @@ router.post("/loginAction", (req, res, next) => {
     }, () => {});
 });
 
-router.get("/logoutAction", (req, res, next) => {
+router.get("/logoutAction", (req, res) => {
     if (req.session.username) {
         delete req.session["username"];
     }
     res.redirect("login");
 });
 
-router.get("/createAccount", (req, res, next) => {
+router.get("/createAccount", (req, res) => {
     pageUtils.renderPage(
         res,
         pageUtils.getLocalViewPath("createAccount.html"),
@@ -88,7 +88,7 @@ router.get("/createAccount", (req, res, next) => {
     );
 });
 
-router.post("/createAccountAction", (req, res, next) => {
+router.post("/createAccountAction", (req, res) => {
     const tempUsername = req.body.username;
     const tempPassword = req.body.password;
     const tempEmailAddress = req.body.emailAddress;
@@ -139,7 +139,7 @@ router.post("/createAccountAction", (req, res, next) => {
     }, () => {});
 });
 
-router.get("/changePassword", checkAuthentication(PAGE_ERROR_OUTPUT), (req, res, next) => {
+router.get("/changePassword", checkAuthentication(PAGE_ERROR_OUTPUT), (req, res) => {
     pageUtils.renderPage(
         res,
         pageUtils.getLocalViewPath("changePassword.html"),
@@ -148,7 +148,7 @@ router.get("/changePassword", checkAuthentication(PAGE_ERROR_OUTPUT), (req, res,
     );
 });
 
-router.post("/changePasswordAction", checkAuthentication(JSON_ERROR_OUTPUT), (req, res, next) => {
+router.post("/changePasswordAction", checkAuthentication(JSON_ERROR_OUTPUT), (req, res) => {
     const tempUsername = pageUtils.getUsername(req);
     const tempOldPassword = req.body.oldPassword;
     const tempNewPassword = req.body.newPassword;
@@ -193,7 +193,7 @@ router.post("/changePasswordAction", checkAuthentication(JSON_ERROR_OUTPUT), (re
     }, () => {});
 });
 
-router.get("/menu", checkAuthentication(PAGE_ERROR_OUTPUT), (req, res, next) => {
+router.get("/menu", checkAuthentication(PAGE_ERROR_OUTPUT), (req, res) => {
     const tempUsername = pageUtils.getUsername(req);
     let tempScore;
     const renderPage = () => {
@@ -227,7 +227,7 @@ router.get("/menu", checkAuthentication(PAGE_ERROR_OUTPUT), (req, res, next) => 
     }
 });
 
-router.get("/game", checkAuthentication(PAGE_ERROR_OUTPUT), (req, res, next) => {
+router.get("/game", checkAuthentication(PAGE_ERROR_OUTPUT), (req, res) => {
     const tempModuleList = ostracodMultiplayer.gameConfig.pageModules;
     for (const module of tempModuleList) {
         if (typeof module.viewContent === "undefined"
@@ -271,7 +271,7 @@ router.get("/game", checkAuthentication(PAGE_ERROR_OUTPUT), (req, res, next) => 
     );
 });
 
-router.ws("/gameUpdate", checkAuthentication(SOCKET_ERROR_OUTPUT), (ws, req, next) => {
+router.ws("/gameUpdate", checkAuthentication(SOCKET_ERROR_OUTPUT), (ws, req) => {
     console.log("Opening socket.");
     ws.on("message", (message) => {
         const tempCommandList = JSON.parse(message);
@@ -304,7 +304,7 @@ router.ws("/gameUpdate", checkAuthentication(SOCKET_ERROR_OUTPUT), (ws, req, nex
     };
 });
 
-router.get("/leaderboard", (req, res, next) => {
+router.get("/leaderboard", (req, res) => {
     dbUtils.performTransaction((done) => {
         accountUtils.getLeaderboardAccounts(20, (error, accountList) => {
             if (error) {
@@ -322,7 +322,7 @@ router.get("/leaderboard", (req, res, next) => {
                 pageUtils.getLocalViewPath("leaderboard.html"),
                 {},
                 {
-                    accountList: accountList,
+                    accountList,
                     url: tempUrl.url,
                     urlLabel: tempUrl.urlLabel,
                 },

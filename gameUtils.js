@@ -53,13 +53,13 @@ class Player {
             accountUtils.updateAccount(
                 this.accountUid,
                 tempFieldSet,
-                (error, result) => {
+                (error) => {
                     if (error) {
                         console.log(error);
                         return;
                     }
                     callback();
-                }
+                },
             );
         }, done);
     }
@@ -151,10 +151,7 @@ class GameUtils {
     
     performUpdate(username, commandList, done) {
         const errorHandler = (message) => {
-            done({
-                success: false,
-                message: message
-            });
+            done({ success: false, message });
         };
         if (this.hasStopped) {
             errorHandler("The server is scheduled to shut down. Please come back later.");
@@ -173,7 +170,7 @@ class GameUtils {
             if (index >= commandList.length) {
                 done({
                     success: true,
-                    commandList: tempCommandList
+                    commandList: tempCommandList,
                 });
                 return;
             }
@@ -236,7 +233,7 @@ class GameUtils {
                         return;
                     }
                     startProcessingCommands();
-                }
+                },
             );
         } else {
             if (tempPlayer.hasLeftGame) {
@@ -349,7 +346,7 @@ const addSetOnlinePlayersCommand = (playerList, commandList) => {
         commandName: "setOnlinePlayers",
         players: tempItemList,
     });
-}
+};
 
 gameUtils.addCommandListener(
     "startPlaying",
@@ -363,7 +360,7 @@ gameUtils.addCommandListener(
 gameUtils.addCommandListener(
     "addChatMessage",
     true,
-    (command, player, commandList) => {
+    (command, player) => {
         gameUtils.addChatMessage(player.username, command.text);
     },
 );
@@ -402,7 +399,7 @@ gameUtils.addCommandListener(
 const exitEvent = () => {
     gameUtils.persistEverything(() => {
         process.exit();
-    })
+    });
 };
 
 process.on("SIGINT", exitEvent);

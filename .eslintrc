@@ -1,0 +1,70 @@
+{
+    "root": true,
+    "parserOptions": {
+        "ecmaVersion": 2017
+    },
+    "env": {
+        "es6": true,
+        "node": true
+    },
+    "extends": [
+        "eslint:recommended"
+    ],
+    "rules": {
+        "array-bracket-spacing": 1,
+        "array-callback-return": 2,
+        "arrow-body-style": 1,
+        "arrow-parens": 1,
+        "arrow-spacing": 1,
+        "brace-style": 1,
+        "camelcase": 1,
+        "comma-dangle": ["warn", "always-multiline"],
+        "comma-spacing": 1,
+        "comma-style": 1,
+        "eqeqeq": 2,
+        "func-call-spacing": 1,
+        "func-style": 1,
+        "implicit-arrow-linebreak": 1,
+        "indent": ["warn", 4],
+        "key-spacing": [
+            "warn",
+            {
+                "beforeColon": false,
+                "afterColon": true
+            }
+        ],
+        "keyword-spacing": [
+            "warn",
+            {
+                "before": true,
+                "after": true
+            }
+        ],
+        "new-cap": 1,
+        "no-constant-condition": 0,
+        "no-multi-assign": 1,
+        "no-multiple-empty-lines": 1,
+        "no-trailing-spaces": [
+            "warn",
+            { "skipBlankLines": true }
+        ],
+        "no-whitespace-before-property": 1,
+        "object-curly-spacing": ["warn", "always"],
+        "object-shorthand": 1,
+        "one-var": ["warn", "never"],
+        "prefer-arrow-callback": 1,
+        "prefer-destructuring": [
+            "warn",
+            {
+                "array": false,
+                "object": true
+            }
+        ],
+        "quotes": ["warn", "double"],
+        "radix": 1,
+        "semi": ["warn", "always"],
+        "space-before-blocks": 1,
+        "space-in-parens": 1,
+        "space-infix-ops": 1
+    }
+}

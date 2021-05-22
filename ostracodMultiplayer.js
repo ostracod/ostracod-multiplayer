@@ -6,7 +6,7 @@ const logger = require("morgan");
 const cookieParser = require("cookie-parser");
 const bodyParser = require("body-parser");
 const mustacheExpress = require("mustache-express");
-const session = require("express-session")
+const session = require("express-session");
 const http = require("http");
 const https = require("https");
 const fs = require("fs");
@@ -141,8 +141,8 @@ class OstracodMultiplayer {
             secret: sessionSecret,
             resave: false,
             saveUninitialized: true,
-            cookie: { maxAge: 24 * 60 * 60 * 1000 }
-        }))
+            cookie: { maxAge: 24 * 60 * 60 * 1000 },
+        }));
         
         const router = require("./router");
         this.expressApp.use("/", router);
@@ -158,6 +158,7 @@ class OstracodMultiplayer {
         });
         
         // Error handler.
+        // eslint-disable-next-line no-unused-vars
         this.expressApp.use((error, req, res, next) => {
             const tempParameters = { message: error.message };
             if (this.mode === "development") {

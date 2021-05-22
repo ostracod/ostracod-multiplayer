@@ -125,7 +125,7 @@ class PageUtils {
                 if (pageUtils.isAuthenticated(req)) {
                     next();
                 } else {
-                    ws.on("message", (message) => {
+                    ws.on("message", () => {
                         ws.send(JSON.stringify({
                             success: false,
                             message: "You are not currently logged in.",

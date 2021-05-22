@@ -11,7 +11,7 @@ const reportSqlError = (error) => {
     console.log("Could not connect to MySQL.");
     console.log(error.code);
     console.log(error.sqlMessage);
-}
+};
 
 const exitCleanly = (exitValue) => {
     if (typeof exitValue === "undefined") {
@@ -21,7 +21,7 @@ const exitCleanly = (exitValue) => {
         connection.end();
     }
     process.exit(exitValue);
-}
+};
 
 const printUsageAndExit = () => {
     console.log("Usage:");
@@ -29,13 +29,13 @@ const printUsageAndExit = () => {
     console.log("node schemaTool.js verify");
     console.log("node schemaTool.js destroy (-f)");
     exitCleanly(1);
-}
+};
 
 const databaseExists = (done) => {
     connection.query(
         "SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = ?",
         [databaseName],
-        (error, results, fields) => {
+        (error, results) => {
             if (error) {
                 reportSqlError(error);
                 exitCleanly();
@@ -44,13 +44,13 @@ const databaseExists = (done) => {
             done(results.length > 0);
         },
     );
-}
+};
 
 const tableExists = (table, done) => {
     connection.query(
         "SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ?",
         [databaseName, table.name],
-        (error, results, fields) => {
+        (error, results) => {
             if (error) {
                 reportSqlError(error);
                 exitCleanly();
@@ -59,13 +59,13 @@ const tableExists = (table, done) => {
             done(results.length > 0);
         },
     );
-}
+};
 
 const getTableFieldAttributes = (table, field, done) => {
     connection.query(
         "SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ? AND COLUMN_NAME = ?",
         [databaseName, table.name, field.name],
-        (error, results, fields) => {
+        (error, results) => {
             if (error) {
                 reportSqlError(error);
                 exitCleanly();
@@ -78,7 +78,7 @@ const getTableFieldAttributes = (table, field, done) => {
             }
         },
     );
-}
+};
 
 const compareTableFieldAttributes = (table, field, fieldAttributes) => {
     let outputMessageList = [];
@@ -99,7 +99,7 @@ const compareTableFieldAttributes = (table, field, fieldAttributes) => {
     let tempColumnKey = fieldAttributes.COLUMN_KEY.toUpperCase();
     let tempExpectedColumnKey;
     if ("primaryKey" in field && field.primaryKey) {
-        tempExpectedColumnKey = "PRI"
+        tempExpectedColumnKey = "PRI";
     } else if ("indexed" in field && field.indexed) {
         tempExpectedColumnKey = "MUL";
     } else {
@@ -110,7 +110,7 @@ const compareTableFieldAttributes = (table, field, fieldAttributes) => {
         tempAttributesAreCorrect = false;
     }
     
-    const tempIsAutoIncrement = (fieldAttributes.EXTRA.toLowerCase() === "auto_increment")
+    const tempIsAutoIncrement = (fieldAttributes.EXTRA.toLowerCase() === "auto_increment");
     let tempShouldBeAutoIncrement;
     if ("autoIncrement" in field) {
         tempShouldBeAutoIncrement = field.autoIncrement;
@@ -129,13 +129,13 @@ const compareTableFieldAttributes = (table, field, fieldAttributes) => {
         isCorrect: tempAttributesAreCorrect,
         message: outputMessageList.join("\n"),
     };
-}
+};
 
 const createDatabase = (done) => {
     connection.query(
         "CREATE DATABASE " + databaseName,
         [],
-        (error, results, fields) => {
+        (error) => {
             if (error) {
                 reportSqlError(error);
                 exitCleanly();
@@ -144,7 +144,7 @@ const createDatabase = (done) => {
             done();
         },
     );
-}
+};
 
 const getFieldDefinition = (field) => {
     let output = field.name + " " + field.type;
@@ -154,7 +154,7 @@ const getFieldDefinition = (field) => {
         }
     }
     return output;
-}
+};
 
 const createTable = (table, done) => {
     const fieldDefinitionList = [];
@@ -173,7 +173,7 @@ const createTable = (table, done) => {
     connection.query(
         "CREATE TABLE " + databaseName + "." + table.name + " (" + fieldDefinitionList.join(", ") + ")",
         [],
-        (error, results, fields) => {
+        (error) => {
             if (error) {
                 reportSqlError(error);
                 exitCleanly();
@@ -182,7 +182,7 @@ const createTable = (table, done) => {
             done();
         },
     );
-}
+};
 
 const addTableField = (table, field, done) => {
     const tempDefinition = getFieldDefinition(field);
@@ -193,7 +193,7 @@ const addTableField = (table, field, done) => {
     connection.query(
         tempStatement,
         [],
-        (error, results, fields) => {
+        (error) => {
             if (error) {
                 reportSqlError(error);
                 exitCleanly();
@@ -202,13 +202,13 @@ const addTableField = (table, field, done) => {
             done();
         },
     );
-}
+};
 
 const deleteDatabase = (done) => {
     connection.query(
         "DROP DATABASE " + databaseName,
         [],
-        (error, results, fields) => {
+        (error) => {
             if (error) {
                 reportSqlError(error);
                 exitCleanly();
@@ -217,7 +217,7 @@ const deleteDatabase = (done) => {
             done();
         },
     );
-}
+};
 
 const setUpTableField = (table, field, done) => {
     getTableFieldAttributes(table, field, (fieldAttributes) => {
@@ -237,7 +237,7 @@ const setUpTableField = (table, field, done) => {
             done();
         });
     });
-}
+};
 
 const setUpTableFields = (table, done) => {
     let index = 0;
@@ -251,7 +251,7 @@ const setUpTableFields = (table, done) => {
         setUpTableField(table, tempField, setUpNextTableField);
     };
     setUpNextTableField();
-}
+};
 
 const setUpTable = (table, done) => {
     tableExists(table, (exists) => {
@@ -266,7 +266,7 @@ const setUpTable = (table, done) => {
             done();
         });
     });
-}
+};
 
 const setUpTables = (done) => {
     let index = 0;
@@ -280,7 +280,7 @@ const setUpTables = (done) => {
         setUpTable(tempTable, setUpNextTable);
     };
     setUpNextTable();
-}
+};
 
 const setUpDatabase = (done) => {
     databaseExists((exists) => {
@@ -295,7 +295,7 @@ const setUpDatabase = (done) => {
             setUpTables(done);
         });
     });
-}
+};
 
 const setUpSchemaCommand = () => {
     console.log("Setting up database...");
@@ -303,7 +303,7 @@ const setUpSchemaCommand = () => {
         console.log("Finished setting up database \"" + databaseName + "\".");
         exitCleanly();
     });
-}
+};
 
 const verifyTableField = (table, field, done) => {
     getTableFieldAttributes(table, field, (fieldAttributes) => {
@@ -316,7 +316,7 @@ const verifyTableField = (table, field, done) => {
         console.log(tempResult.message);
         done();
     });
-}
+};
 
 const verifyTableFields = (table, done) => {
     let index = 0;
@@ -330,7 +330,7 @@ const verifyTableFields = (table, done) => {
         verifyTableField(table, tempField, verifyNextTableField);
     };
     verifyNextTableField();
-}
+};
 
 const verifyTable = (table, done) => {
     tableExists(table, (exists) => {
@@ -342,7 +342,7 @@ const verifyTable = (table, done) => {
         console.log("Table \"" + table.name + "\" exists.");
         verifyTableFields(table, done);
     });
-}
+};
 
 const verifyTables = (done) => {
     let index = 0;
@@ -356,7 +356,7 @@ const verifyTables = (done) => {
         verifyTable(tempTable, verifyNextTable);
     };
     verifyNextTable();
-}
+};
 
 const verifyDatabase = (done) => {
     databaseExists((exists) => {
@@ -368,7 +368,7 @@ const verifyDatabase = (done) => {
         console.log("Database \"" + databaseName + "\" exists.");
         verifyTables(done);
     });
-}
+};
 
 const verifySchemaCommand = () => {
     console.log("Verifying database...");
@@ -376,7 +376,7 @@ const verifySchemaCommand = () => {
         console.log("Finished verifying database.");
         exitCleanly();
     });
-}
+};
 
 const destroyDatabase = () => {
     console.log("Destroying database...");
@@ -391,7 +391,7 @@ const destroyDatabase = () => {
             exitCleanly();
         });
     });
-}
+};
 
 const destroySchemaCommand = () => {
     if ("f" in args && args.f) {
@@ -407,7 +407,7 @@ const destroySchemaCommand = () => {
             { text: ["Destroy", "Cancel"] },
         );
     }
-}
+};
 
 const processCli = () => {
     
@@ -422,7 +422,7 @@ const processCli = () => {
     } else {
         printUsageAndExit();
     }
-}
+};
 
 const baseDirectory = "./ostracodMultiplayerConfig";
 
@@ -437,7 +437,7 @@ const schemaConfigPath = pathUtils.join(baseDirectory, "schemaConfig.json");
 
 const databaseConfig = JSON.parse(fs.readFileSync(databaseConfigPath, "utf8"));
 const schemaConfig = JSON.parse(fs.readFileSync(schemaConfigPath, "utf8"));
-const databaseName = databaseConfig.databaseName
+const { databaseName } = databaseConfig;
 
 const args = parseArgs(process.argv.slice(2));
 
