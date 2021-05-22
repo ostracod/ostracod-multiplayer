@@ -27,7 +27,7 @@ const printUsageAndExit = () => {
     console.log("Usage:");
     console.log("node schemaTool.js setUp");
     console.log("node schemaTool.js verify");
-    console.log("node schemaTool.js destroy");
+    console.log("node schemaTool.js destroy (-f)");
     exitCleanly(1);
 }
 
@@ -394,17 +394,19 @@ const destroyDatabase = () => {
 }
 
 const destroySchemaCommand = () => {
-    confirm(
-        "Are you sure you want to destroy the database \"" + databaseName + "\"?",
-        () => {
-            destroyDatabase();
-        },
-        () => {
-            console.log("Database NOT destroyed.");
-            exitCleanly();
-        },
-        { text: ["Destroy", "Cancel"] },
-    );
+    if ("f" in args && args.f) {
+        destroyDatabase();
+    } else {
+        confirm(
+            "Are you sure you want to destroy the database \"" + databaseName + "\"?",
+            destroyDatabase,
+            () => {
+                console.log("Database NOT destroyed.");
+                exitCleanly();
+            },
+            { text: ["Destroy", "Cancel"] },
+        );
+    }
 }
 
 const processCli = () => {
@@ -439,7 +441,7 @@ const databaseName = databaseConfig.databaseName
 
 const args = parseArgs(process.argv.slice(2));
 
-if (args["_"].length <= 0) {
+if (args["_"].length !== 1) {
     printUsageAndExit();
 }
 
