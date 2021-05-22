@@ -19,10 +19,8 @@
     </p>
 </div>
 <div style="float: left; margin-left: 15px; margin-top: 15px; width: 350px;">
-    <div style="background: #444444; padding-right: 8px; padding-bottom: 8px; border-radius: 15px;">
-        {{#modules}}
-            <button id="{{name}}Button" class="moduleButton" onclick="showOrHideModuleByName('{{name}}');">{{buttonLabel}}</button>
-        {{/modules}}
+    <div id="moduleButtonsContainer" style="background: #444444; padding-right: 8px; padding-bottom: 8px; border-radius: 15px;">
+        {{#modules}}<button id="{{name}}Button" class="moduleButton" onclick="showOrHideModuleByName('{{name}}');">{{buttonLabel}}</button>{{/modules}}
     </div>
     {{#modules}}
         <div id="{{name}}Module" class="module">

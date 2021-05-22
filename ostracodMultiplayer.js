@@ -103,6 +103,22 @@ class OstracodMultiplayer {
         this.expressApp.set("views", this.localViewsDirectory);
         this.expressApp.engine("html", mustacheExpress());
         
+        let sessionSecret;
+        if ("secret" in this.serverConfig) {
+            sessionSecret = this.serverConfig.secret;
+        } else {
+            const secretPath = pathUtils.join(this.configDirectory, "sessionSecret.txt");
+            if (fs.existsSync(secretPath)) {
+                sessionSecret = fs.readFileSync(secretPath, "utf8");
+            } else {
+                sessionSecret = "";
+                while (sessionSecret.length < 30) {
+                    sessionSecret += Math.floor(Math.random() * 10);
+                }
+                fs.writeFileSync(secretPath, sessionSecret);
+            }
+        }
+        
         const faviconPath = pathUtils.join(this.configDirectory, "public", "favicon.ico");
         if (fs.existsSync(faviconPath)) {
             this.expressApp.use(favicon(faviconPath));
@@ -114,7 +130,7 @@ class OstracodMultiplayer {
         this.expressApp.use(express.static(pathUtils.join(basePath, "public")));
         this.expressApp.set("trust proxy", 1);
         this.expressApp.use(session({
-            secret: this.serverConfig.secret,
+            secret: sessionSecret,
             resave: false,
             saveUninitialized: true,
             cookie: { maxAge: 24 * 60 * 60 * 1000 }

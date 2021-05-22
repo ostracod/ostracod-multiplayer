@@ -63,12 +63,13 @@ Format of `serverConfig.json`:
     "gameName": String,
     "author": String,
     "port": Number,
-    "secret": String (For cookies),
+    "secret": String (Optional, for cookies),
     "welcomeViewFile": String,
     "stylesheets": [String]
 }
 ```
 
+* If `secret` is excluded, the server will automatically generate a secret string.
 * `welcomeViewFile` should be a file name inside your `views` directory.
 * `stylesheets` is a list of stylesheet paths to include in every page.
 
