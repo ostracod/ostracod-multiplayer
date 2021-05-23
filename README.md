@@ -252,6 +252,7 @@ The global scope in the game page exposes the following members:
 * `Pos`: Represents a 2D position.
 * `Color`: Represents an RGB color.
 * `canvas` and `context`: For rendering graphics.
+* `canvasPixelSize`: Scaling factor for pixels on the canvas.
 * `canvasWidth` and `canvasHeight`: Canvas dimensions as defined in your config file.
 * `canvasBackgroundColor`: Color string as defined in your config file.
 * `framesPerSecond`: FPS as defined in your config file.

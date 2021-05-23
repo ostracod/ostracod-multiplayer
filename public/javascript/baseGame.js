@@ -1,6 +1,7 @@
 
 var canvas;
 var context;
+var canvasPixelScale = 2;
 var canvasWidth;
 var canvasHeight;
 var canvasBackgroundColor;
@@ -413,7 +414,8 @@ function baseTimerEvent() {
 function convertCanvasMouseEventToPos(event) {
     var x = event.offsetX - canvasBorderWidth;
     var y = event.offsetY - canvasBorderWidth;
-    if (x < 0 || x >= canvasWidth || y < 0 || y >= canvasHeight) {
+    if (x < 0 || x >= canvasWidth / canvasPixelScale
+            || y < 0 || y >= canvasHeight / canvasPixelScale) {
         return null;
     }
     return new Pos(x, y);
@@ -463,8 +465,8 @@ function baseInitializeGame() {
     
     canvas.width = canvasWidth;
     canvas.height = canvasHeight;
-    canvas.style.width = canvasWidth / 2;
-    canvas.style.height = canvasHeight / 2;
+    canvas.style.width = canvasWidth / canvasPixelScale;
+    canvas.style.height = canvasHeight / canvasPixelScale;
     canvas.style.border = canvasBorderWidth + "px #000000 solid";
     
     canvas.onclick = baseCanvasClickEvent;
