@@ -205,7 +205,7 @@ class GameUtils {
                 };
             } else {
                 tempOperation = (callback) => {
-                    listenerOperation().then(() => {
+                    listenerOperation(tempCommand, tempPlayer, tempCommandList).then(() => {
                         callback(null);
                     }).catch((error) => {
                         callback(error);
