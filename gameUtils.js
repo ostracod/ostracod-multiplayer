@@ -103,20 +103,22 @@ class GameUtils {
     }
     
     performAtomicOperation(operation, done) {
-        const queueOperation = (callback) => {
-            operation((error) => {
-                callback();
-                if (typeof error === "undefined") {
-                    error = null;
-                }
-                done(error);
-            });
-        };
-        this.atomicOperationQueue.push(queueOperation);
-        if (!this.isPerformingAtomicOperation) {
-            this.isPerformingAtomicOperation = true;
-            this.performNextAtomicOperation();
-        }
+        return niceUtils.performAsyncOperation((callback) => {
+            const queueOperation = (callback2) => {
+                niceUtils.performAsyncOperation(operation, 1, (error) => {
+                    callback2();
+                    if (typeof error === "undefined") {
+                        error = null;
+                    }
+                    callback(error);
+                });
+            };
+            this.atomicOperationQueue.push(queueOperation);
+            if (!this.isPerformingAtomicOperation) {
+                this.isPerformingAtomicOperation = true;
+                this.performNextAtomicOperation();
+            }
+        }, 1, done);
     }
     
     addChatMessage(username, text) {
@@ -182,21 +184,32 @@ class GameUtils {
                 processNextCommand();
                 return;
             }
+            const listenerOperation = tempCommandListener.operation;
             let tempOperation;
             if (tempCommandListener.isSynchronous) {
                 tempOperation = (callback) => {
-                    tempCommandListener.operation(tempCommand, tempPlayer, tempCommandList);
+                    listenerOperation(tempCommand, tempPlayer, tempCommandList);
                     setTimeout(callback, 0);
                 };
-            } else {
+            } else if (listenerOperation.length > 3) {
                 tempOperation = (callback) => {
-                    tempCommandListener.operation(
+                    listenerOperation(
                         tempCommand,
                         tempPlayer,
                         tempCommandList,
-                        callback,
+                        () => {
+                            callback(null);
+                        },
                         callback,
                     );
+                };
+            } else {
+                tempOperation = (callback) => {
+                    listenerOperation().then(() => {
+                        callback(null);
+                    }).catch((error) => {
+                        callback(error);
+                    });
                 };
             }
             this.performAtomicOperation(tempOperation, (error) => {
@@ -276,7 +289,7 @@ class GameUtils {
             }
             done();
         };
-        this.gameDelegate.persistEvent(persistAllPlayers);
+        niceUtils.performAsyncOperation(this.gameDelegate.persistEvent, 0, persistAllPlayers);
     }
     
     persistEverything(done) {
@@ -408,6 +421,7 @@ process.on("SIGUSR2", exitEvent);
 
 module.exports = { gameUtils };
 
+const { niceUtils } = require("./niceUtils");
 const { ostracodMultiplayer } = require("./ostracodMultiplayer");
 const { dbUtils } = require("./dbUtils");
 const { accountUtils } = require("./accountUtils");

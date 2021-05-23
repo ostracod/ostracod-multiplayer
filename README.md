@@ -194,27 +194,27 @@ Members of `pageUtils`:
 
 Members of `dbUtils`:
 
-* `dbUtils.performTransaction(operation, done)`: Performs the operation with a lock on the database.
-* `dbUtils.performQuery(query, parameterList, done)`: Performs a single query on the database. Will not work outside of `performTransaction`.
+* `dbUtils.performTransaction(operation, done?)`: Performs the operation with a lock on the database.
+* `dbUtils.performQuery(query, parameterList, done?)`: Performs a single query on the database. Will not work outside of `performTransaction`.
 
 Members of `accountUtils`:
 
-* `accountUtils.getAccountByUsername(username, done)`: Retrieves a user by username. Must be performed in a DB transaction.
-* `accountUtils.updateAccount(uid, valueSet, done)`: Modifies fields in a user account. Must be performed in a DB transaction.
-* `accountUtils.removeAccount(uid, done)`: Removes a user account. Must be performed in a DB transaction.
+* `accountUtils.getAccountByUsername(username, done?)`: Retrieves a user by username. Must be performed in a DB transaction.
+* `accountUtils.updateAccount(uid, valueSet, done?)`: Modifies fields in a user account. Must be performed in a DB transaction.
+* `accountUtils.removeAccount(uid, done?)`: Removes a user account. Must be performed in a DB transaction.
 
 Members of `gameUtils`:
 
 * `gameUtils.isPersistingEverything`: Indicates whether server state is being saved to non-volatile storage.
 * `gameUtils.playerList`: List of players in the game and non-persisted players.
-* `gameUtils.performAtomicOperation(operation, done)`: Perform `operation` so that it does not happen at the same time as another atomic `gameUtils` operation.
-    * `operation` accepts a single argument `(done)`.
+* `gameUtils.performAtomicOperation(operation, done?)`: Perform `operation` so that it does not happen at the same time as another atomic `gameUtils` operation.
+    * `operation` accepts a single argument `(done?)`.
     * `done` accepts a single optional argument `(errorMessage)`.
 * `gameUtils.announceMessageInChat(text)`: Send a message to all players.
 * `gameUtils.getPlayerByUsername(username, includeStale)`: Retrieves a player. If `includeStale` is true, output includes players which have left the game.
 * `gameUtils.addCommandListener(commandName, isSynchronous, operation)`: Perform an atomic operation if the client sends a particular command.
     * If synchronous, `operation` accepts the arguments `(command, player, commandList)`.
-    * If asynchronous, `operation` accepts the arguments `(command, player, commandList, done, errorHandler)`.
+    * If asynchronous, `operation` accepts the arguments `(command, player, commandList, done?, errorHandler?)`.
         * `errorHandler` accepts a single argument `(message)`.
     * In both cases, `command` is the incoming command, `player` is the client player, and `commandList` is a list of response commands.
 
@@ -229,7 +229,7 @@ Your project must create a `GameDelegate` and pass it into `ostracodMultiplayer.
 
 * `gameDelegate.playerEnterEvent(player)`: Called whenever a player enters the game.
 * `gameDelegate.playerLeaveEvent(player)`: Called whenever a player leaves the game.
-* `gameDelegate.persistEvent(done)`: Called immediately before the server persists game state. Performed within an atomic `gameUtils` operation.
+* `gameDelegate.persistEvent(done?)`: Called immediately before the server persists game state. Performed within an atomic `gameUtils` operation.
 
 To run your project for development, perform this command:
 

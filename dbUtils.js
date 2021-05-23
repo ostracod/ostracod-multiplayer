@@ -47,12 +47,14 @@ class DbUtils {
     }
     
     performTransaction(operation, done) {
-        dbUtils.startTransaction(() => {
-            operation(() => {
-                dbUtils.finishTransaction();
-                done();
+        return niceUtils.performAsyncOperation((callback) => {
+            dbUtils.startTransaction(() => {
+                niceUtils.performAsyncOperation(operation, 0, () => {
+                    dbUtils.finishTransaction();
+                    callback();
+                });
             });
-        });
+        }, 0, done);
     }
     
     performQuery(query, parameterList, done) {
@@ -60,7 +62,9 @@ class DbUtils {
             console.log("Missing lock!");
             return;
         }
-        this.connection.query(query, parameterList, done);
+        return niceUtils.performAsyncOperation((callback) => {
+            this.connection.query(query, parameterList, callback);
+        }, 3, done);
     }
 }
 
@@ -68,6 +72,7 @@ const dbUtils = new DbUtils();
 
 module.exports = { dbUtils };
 
+const { niceUtils } = require("./niceUtils");
 const { ostracodMultiplayer } = require("./ostracodMultiplayer");
 
 
