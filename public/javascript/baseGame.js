@@ -458,16 +458,7 @@ function baseMouseUpEvent() {
     }
 }
 
-function baseInitializeGame() {
-    
-    canvas = document.getElementById("canvas");
-    context = canvas.getContext("2d");
-    
-    canvas.width = canvasWidth;
-    canvas.height = canvasHeight;
-    canvas.style.width = canvasWidth / canvasPixelScale;
-    canvas.style.height = canvasHeight / canvasPixelScale;
-    canvas.style.border = canvasBorderWidth + "px #000000 solid";
+function baseInitializeGameHelper() {
     
     canvas.onclick = baseCanvasClickEvent;
     canvas.onmousemove = baseCanvasMouseMoveEvent;
@@ -475,15 +466,8 @@ function baseInitializeGame() {
     canvas.onmouseleave = baseCanvasMouseLeaveEvent;
     document.getElementsByTagName("body")[0].onmouseup = baseMouseUpEvent;
     
-    chatInput = document.getElementById("chatInput");
-    chatOutput = document.getElementById("chatOutput");
-    overlayChatInput = document.getElementById("overlayChatInput");
-    overlayChatOutput = document.getElementById("overlayChatOutput");
-    
     window.onkeydown = baseKeyDownEvent;
     window.onkeyup = baseKeyUpEvent;
-    
-    addStartPlayingCommand();
     
     var tempProtocol;
     if (window.location.protocol == "http:") {
@@ -510,7 +494,31 @@ function baseInitializeGame() {
         index += 1;
     }
     
-    clientDelegate.initialize();
+    addStartPlayingCommand();
+}
+
+function baseInitializeGame() {
+    
+    canvas = document.getElementById("canvas");
+    context = canvas.getContext("2d");
+    
+    canvas.width = canvasWidth;
+    canvas.height = canvasHeight;
+    canvas.style.width = canvasWidth / canvasPixelScale;
+    canvas.style.height = canvasHeight / canvasPixelScale;
+    canvas.style.border = canvasBorderWidth + "px #000000 solid";
+    
+    chatInput = document.getElementById("chatInput");
+    chatOutput = document.getElementById("chatOutput");
+    overlayChatInput = document.getElementById("overlayChatInput");
+    overlayChatOutput = document.getElementById("overlayChatOutput");
+    
+    if (clientDelegate.initialize.length <= 0) {
+        clientDelegate.initialize();
+        baseInitializeGameHelper();
+    } else {
+        clientDelegate.initialize(baseInitializeGameHelper);
+    }
 }
 
 

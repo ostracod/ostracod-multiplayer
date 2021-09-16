@@ -289,7 +289,7 @@ Members of `Color`:
 
 Your client script must create a `ClientDelegate` and assign it to the global variable `clientDelegate`. `ClientDelegate` must have the following members:
 
-* `clientDelegate.initialize()`: Called after the whole page is loaded.
+* `clientDelegate.initialize(done?)`: Called after the page is loaded, and before registering event listeners.
 * `clientDelegate.setLocalPlayerInfo(command)`: Called after the client receives local player information. `command` contains the members `username`, `score`, and `extraFields`.
 * `clientDelegate.addCommandsBeforeUpdateRequest()`: Called before sending each bundle of commands through the web socket.
 * `clientDelegate.timerEvent()`: Called for each client frame.
