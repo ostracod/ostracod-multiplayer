@@ -49,8 +49,11 @@ function ClientDelegate() {
 }
 
 // Called after the page loads.
-ClientDelegate.prototype.initialize = function() {
-    console.log("Initialized!");
+ClientDelegate.prototype.initialize = function(done) {
+    setTimeout(function() {
+        console.log("Initialized!");
+        done();
+    }, 2 * 1000);
 }
 
 // Called after the client receives information about the local player.

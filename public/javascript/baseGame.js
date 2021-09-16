@@ -508,6 +508,10 @@ function baseInitializeGame() {
     canvas.style.height = canvasHeight / canvasPixelScale;
     canvas.style.border = canvasBorderWidth + "px #000000 solid";
     
+    context.font = "32px Arial";
+    context.fillStyle = "#000000";
+    context.fillText("Initializing game...", 30, 60);
+    
     chatInput = document.getElementById("chatInput");
     chatOutput = document.getElementById("chatOutput");
     overlayChatInput = document.getElementById("overlayChatInput");
