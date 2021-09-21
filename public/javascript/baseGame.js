@@ -160,9 +160,9 @@ addCommandListener("setOnlinePlayers", function(command) {
     var tempTag = document.getElementById("onlinePlayersDiv");
     var tempContentList = [];
     var index = 0;
-    while (index < command.players.length) {
-        var tempPlayer = command.players[index];
-        tempContentList.push("<strong>" + encodeHtmlEntity(tempPlayer.username) + " (" + tempPlayer.score + ")</strong><br />");
+    while (index < command.lines.length) {
+        var tempLine = command.lines[index];
+        tempContentList.push("<strong>" + encodeHtmlEntity(tempLine) + "</strong><br />");
         index += 1;
     }
     tempTag.innerHTML = tempContentList.join("");

@@ -348,16 +348,17 @@ const addAddChatMessageCommand = (chatMessage, commandList) => {
 };
 
 const addSetOnlinePlayersCommand = (playerList, commandList) => {
-    const tempItemList = [];
-    for (const player of playerList) {
-        tempItemList.push({
-            username: player.username,
-            score: player.score,
-        });
-    }
+    const { gameDelegate } = gameUtils;
+    const lines = playerList.map((player) => {
+        if ("getOnlinePlayerText" in gameDelegate) {
+            return gameDelegate.getOnlinePlayerText(player);
+        } else {
+            return `${player.username} (${player.score})`;
+        }
+    });
     commandList.push({
         commandName: "setOnlinePlayers",
-        players: tempItemList,
+        lines,
     });
 };
 

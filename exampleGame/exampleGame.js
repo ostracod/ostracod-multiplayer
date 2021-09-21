@@ -25,6 +25,11 @@ class GameDelegate {
         console.log("Persist event!");
         done();
     }
+    
+    // Determines the line of text to display for each online player.
+    getOnlinePlayerText(player) {
+        return player.username + " :: " + player.extraFields.inspiration;
+    }
 }
 
 const gameDelegate = new GameDelegate();

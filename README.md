@@ -230,6 +230,7 @@ Your project must create a `GameDelegate` and pass it into `ostracodMultiplayer.
 * `gameDelegate.playerEnterEvent(player)`: Called whenever a player enters the game.
 * `gameDelegate.playerLeaveEvent(player)`: Called whenever a player leaves the game.
 * `gameDelegate.persistEvent(done?)`: Called immediately before the server persists game state. Performed within an atomic `gameUtils` operation.
+* `gameDelegate.getOnlinePlayerText(player)` (Optional): Determines the line of text to display for each online player.
 
 To run your project for development, perform this command:
 
@@ -250,6 +251,7 @@ NODE_ENV=production nohup node (Your Script) > serverMessages.txt 2>&1 &
 The global scope in the game page exposes the following members:
 
 * `Pos`: Represents a 2D position.
+* `createPosFromJson(data)`: Converts JSON data to a `Pos`.
 * `Color`: Represents an RGB color.
 * `canvas` and `context`: For rendering graphics.
 * `canvasPixelSize`: Scaling factor for pixels on the canvas.
@@ -277,6 +279,7 @@ Members of `Pos`:
 * `pos.equals(pos)`
 * `pos.getDistance(pos)`
 * `pos.toString()`
+* `pos.toJson()`
 
 Members of `Color`:
 
