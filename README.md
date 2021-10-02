@@ -266,6 +266,9 @@ The global scope in the game page exposes the following members:
 * `addCommandListener(commandName, operation)`: Perform an operation whenever the client receives a server command. `operation` accepts a single `(command)` argument.
 * `addCommandRepeater(commandName, operation)`: Invoked for any unsent commands after receiving server commands. `operation` accepts a single `(command)` argument.
 * `clearCanvas()`: Erases contents of the canvas using `canvasBackgroundColor`.
+* `getModuleByName(name)`: Retrieves the `Module` with the given name.
+* `showModuleByName(name)`: Opens the page module with the given name.
+* `hideModuleByName(name)`: Closes the page module with the given name.
 
 Members of `Pos`:
 
@@ -289,6 +292,12 @@ Members of `Color`:
 * `color.scale(number)`
 * `color.equals(color)`
 * `color.toString()`
+
+Members of `Module`:
+
+* `module.name` and `module.isVisible`
+* `module.show()`
+* `module.hide()`
 
 Your client script must create a `ClientDelegate` and assign it to the global variable `clientDelegate`. `ClientDelegate` must have the following members:
 
