@@ -1,9 +1,9 @@
 
 var canvas;
 var context;
-var canvasPixelScale = 2;
 var canvasWidth;
 var canvasHeight;
+var canvasPixelScale;
 var canvasBackgroundColor;
 var canvasBorderWidth = 3;
 var framesPerSecond;
@@ -285,6 +285,15 @@ function hideModuleByName(name) {
     tempModule.hide();
 }
 
+function updateCanvasSize() {
+    canvas.width = canvasWidth;
+    canvas.height = canvasHeight;
+    var scaledWidth = canvasWidth / canvasPixelScale;
+    canvas.style.width = scaledWidth;
+    canvas.style.height = canvasHeight / canvasPixelScale;
+    document.getElementById("content").style.width = scaledWidth + 380;
+}
+
 function clearCanvas() {
     context.fillStyle = canvasBackgroundColor;
     context.fillRect(0, 0, canvasWidth, canvasHeight);
@@ -502,15 +511,17 @@ function baseInitializeGame() {
     canvas = document.getElementById("canvas");
     context = canvas.getContext("2d");
     
-    canvas.width = canvasWidth;
-    canvas.height = canvasHeight;
-    canvas.style.width = canvasWidth / canvasPixelScale;
-    canvas.style.height = canvasHeight / canvasPixelScale;
+    updateCanvasSize();
     canvas.style.border = canvasBorderWidth + "px #000000 solid";
     
-    context.font = "32px Arial";
+    var effectiveScale = Math.max(canvasPixelScale, 1);
+    context.font = Math.round(effectiveScale * 16) + "px Arial";
+    var lastTextBaseline = context.textBaseline;
+    context.textBaseline = "top";
     context.fillStyle = "#000000";
-    context.fillText("Initializing game...", 30, 60);
+    var textOffset = Math.round(effectiveScale * 15);
+    context.fillText("Initializing game...", textOffset, textOffset);
+    context.textBaseline = lastTextBaseline;
     
     chatInput = document.getElementById("chatInput");
     chatOutput = document.getElementById("chatOutput");

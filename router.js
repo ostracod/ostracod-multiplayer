@@ -228,7 +228,8 @@ router.get("/menu", checkAuthentication(PAGE_ERROR_OUTPUT), (req, res) => {
 });
 
 router.get("/game", checkAuthentication(PAGE_ERROR_OUTPUT), (req, res) => {
-    const tempModuleList = ostracodMultiplayer.gameConfig.pageModules;
+    const { gameConfig } = ostracodMultiplayer;
+    const tempModuleList = gameConfig.pageModules;
     for (const module of tempModuleList) {
         if (typeof module.viewContent === "undefined"
                 || ostracodMultiplayer.mode === "development") {
@@ -236,34 +237,40 @@ router.get("/game", checkAuthentication(PAGE_ERROR_OUTPUT), (req, res) => {
         }
     }
     const tempInstructionsPath = pageUtils.getConsumerViewPath(
-        ostracodMultiplayer.gameConfig.instructionsViewFile,
+        gameConfig.instructionsViewFile,
     );
     const tempScriptList = ["javascript/baseGame.js"];
-    const tempScriptList2 = ostracodMultiplayer.gameConfig.scripts;
+    const tempScriptList2 = gameConfig.scripts;
     for (const path of tempScriptList2) {
         tempScriptList.push(path);
     }
-    let tempCanvasBackgroundColor;
-    if ("canvasBackgroundColor" in ostracodMultiplayer.gameConfig) {
-        tempCanvasBackgroundColor = ostracodMultiplayer.gameConfig.canvasBackgroundColor;
+    let canvasPixelScale;
+    if ("canvasPixelScale" in gameConfig) {
+        canvasPixelScale = gameConfig.canvasPixelScale;
     } else {
-        tempCanvasBackgroundColor = "#FFFFFF";
+        canvasPixelScale = 2;
+    }
+    let canvasBackgroundColor;
+    if ("canvasBackgroundColor" in gameConfig) {
+        canvasBackgroundColor = gameConfig.canvasBackgroundColor;
+    } else {
+        canvasBackgroundColor = "#FFFFFF";
     }
     pageUtils.renderPage(
         res,
         pageUtils.getLocalViewPath("game.html"),
         {
             scripts: tempScriptList,
-            stylesheets: ostracodMultiplayer.gameConfig.stylesheets,
+            stylesheets: gameConfig.stylesheets,
             shouldDisplayTitle: false,
-            contentWidth: ostracodMultiplayer.gameConfig.canvasWidth / 2 + 380,
         },
         {
             modules: tempModuleList,
-            canvasWidth: ostracodMultiplayer.gameConfig.canvasWidth,
-            canvasHeight: ostracodMultiplayer.gameConfig.canvasHeight,
-            canvasBackgroundColor: tempCanvasBackgroundColor,
-            framesPerSecond: ostracodMultiplayer.gameConfig.framesPerSecond,
+            canvasWidth: gameConfig.canvasWidth,
+            canvasHeight: gameConfig.canvasHeight,
+            canvasPixelScale,
+            canvasBackgroundColor,
+            framesPerSecond: gameConfig.framesPerSecond,
             gameName: ostracodMultiplayer.serverConfig.gameName.toUpperCase(),
             instructions: fs.readFileSync(tempInstructionsPath, "utf8"),
             debugMode: (ostracodMultiplayer.mode === "development"),

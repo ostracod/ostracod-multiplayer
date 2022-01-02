@@ -91,7 +91,8 @@ Format of `gameConfig.json`:
     "stylesheets": [String],
     "canvasWidth": Number,
     "canvasHeight": Number,
-    "canvasBackgroundColor": String,
+    "canvasPixelScale": Number (Optional),
+    "canvasBackgroundColor": String (Optional),
     "framesPerSecond": Number,
     "maximumPlayerCount": Number
 }
@@ -100,7 +101,8 @@ Format of `gameConfig.json`:
 * `instructionsViewFile` should be a file name inside your `views` directory.
 * `scripts` is a list of script paths to include in the game client page.
 * `stylesheets` is a list of stylesheet paths to include in the game client page.
-* `canvasWidth` and `canvasHeight` are double-resolution for retina displays.
+* `canvasPixelScale` is the number of canvas pixels per measurement of CSS pixel. The default value is 2.
+* The default value of `canvasBackgroundColor` is `"#FFFFFF"`.
 
 Format of `databaseConfig.json`:
 
@@ -254,8 +256,8 @@ The global scope in the game page exposes the following members:
 * `createPosFromJson(data)`: Converts JSON data to a `Pos`.
 * `Color`: Represents an RGB color.
 * `canvas` and `context`: For rendering graphics.
-* `canvasPixelSize`: Scaling factor for pixels on the canvas.
 * `canvasWidth` and `canvasHeight`: Canvas dimensions as defined in your config file.
+* `canvasPixelScale`: Scaling factor for pixels as defined in your config file.
 * `canvasBackgroundColor`: Color string as defined in your config file.
 * `framesPerSecond`: FPS as defined in your config file.
 * `shiftKeyIsHeld`: Whether the user is pressing the shift key.
@@ -265,6 +267,7 @@ The global scope in the game page exposes the following members:
 * `clientDelegate`: You must assign a value to this in your script.
 * `addCommandListener(commandName, operation)`: Perform an operation whenever the client receives a server command. `operation` accepts a single `(command)` argument.
 * `addCommandRepeater(commandName, operation)`: Invoked for any unsent commands after receiving server commands. `operation` accepts a single `(command)` argument.
+* `updateCanvasSize()`: Must be invoked after changing `canvasWidth`, `canvasHeight`, or `canvasPixelScale`.
 * `clearCanvas()`: Erases contents of the canvas using `canvasBackgroundColor`.
 * `getModuleByName(name)`: Retrieves the `Module` with the given name.
 * `showModuleByName(name)`: Opens the page module with the given name.
